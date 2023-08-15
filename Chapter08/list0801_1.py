@@ -1,4 +1,3 @@
-    # after()命令を使う
 import tkinter
 tmr = 0
 def count_up():
