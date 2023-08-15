@@ -17,4 +17,7 @@ bind()で取れる主なイベント
 <Motion>        マウスポインタを動かした
 <ButtonPress>   マウスボタンをクリックした
 <Button>        同上
+<Button-1>      左クリック
+<Button-2>      中央クリック
+<Button-3>      右クリック
 """
