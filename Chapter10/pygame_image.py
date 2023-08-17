@@ -18,7 +18,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.quit()
+                sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F1:
                     screen = pygame.display.set_mode((640, 360), pygame.FULLSCREEN)
