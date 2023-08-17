@@ -21,7 +21,7 @@ def game_main():
     fnt = ("Times New Roman", 30)
     txt = "mouse({},{}){}".format(mouse_x, mouse_y, mouse_c)
     cvs.delete("TEST")
-    cvs.create_text(456, 384, text=txt, fill="black", font=fnt, tag="TEST")
+    cvs.create_text(456, 384, text=txt, fill="white", font=fnt, tag="TEST")
     root.after(100, game_main)
 
 root = tkinter.Tk()
