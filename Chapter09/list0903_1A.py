@@ -1,23 +1,21 @@
 import tkinter
 
-cursor_x = 0
-cursor_y = 0
-mouse_x = 0
-mouse_y = 0
+old_x = 0
+old_y = 0
 
 def mouse_move(e):
-    global mouse_x, mouse_y
+    global old_x, old_y
     mouse_x = e.x
     mouse_y = e.y
-
-def game_main():
-    global cursor_x, cursor_y #, mouse_x, mouse_y
-    if 24 <= mouse_x and mouse_x < 24+72*8 and 24 <= mouse_y and mouse_y < 24+72*10:
-        cursor_x = int((mouse_x-24)/72)
-        cursor_y = int((mouse_y-24)/72)
-    cvs.delete("CURSOR")
-    cvs.create_image(cursor_x*72+60, cursor_y*72+60, image=cursor, tag="CURSOR")
-    root.after(100, game_main)
+    if mouse_x < 24 or mouse_x >= 24+72*8 or mouse_y < 24 or mouse_y >= 24+72*10:
+        return
+    cursor_x = int((mouse_x-24)/72)
+    cursor_y = int((mouse_y-24)/72)
+    if cursor_x != old_x or cursor_y != old_y:
+        cvs.delete("CURSOR")
+        cvs.create_image(cursor_x*72+60, cursor_y*72+60, image=cursor, tag="CURSOR")
+    old_x = cursor_x
+    old_y = cursor_y
 
 root = tkinter.Tk()
 root.title("カーソルの表示")
@@ -29,5 +27,4 @@ cvs.pack()
 bg = tkinter.PhotoImage(file="Chapter09/neko_bg.png")
 cursor = tkinter.PhotoImage(file="Chapter09/neko_cursor.png")
 cvs.create_image(456, 384, image=bg)
-game_main()
 root.mainloop()
