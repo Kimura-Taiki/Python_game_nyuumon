@@ -11,9 +11,10 @@ def mouse_move(e):
         return
     cursor_x = int((mouse_x-24)/72)
     cursor_y = int((mouse_y-24)/72)
-    if cursor_x != old_x or cursor_y != old_y:
-        cvs.delete("CURSOR")
-        cvs.create_image(cursor_x*72+60, cursor_y*72+60, image=cursor, tag="CURSOR")
+    if cursor_x == old_x and cursor_y == old_y:
+        return
+    cvs.delete("CURSOR")
+    cvs.create_image(cursor_x*72+60, cursor_y*72+60, image=cursor, tag="CURSOR")
     old_x = cursor_x
     old_y = cursor_y
 
