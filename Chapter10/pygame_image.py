@@ -38,3 +38,13 @@ if __name__ == '__main__':
 screen.blit(画像を読み込んだ変数, [x座標, y座標])
 ※ 座標は左上を指定する
 """
+
+"""     ----画像操作関数----
+1 : 拡大縮小
+    img_s = pygame.transform.scale(img, [幅, 高さ])
+2 : 回転
+    img_r = pygame.transform.rotate(img, 回転角)
+3 : 回転＋拡大縮小
+    img_rz = pygame.transform.rotozoom(img, 回転角, 大きさの比率)
+※ 回転角は度数法(degree)で指定する。
+"""
