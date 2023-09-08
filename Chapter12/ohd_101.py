@@ -75,6 +75,17 @@ imgEffect = [
     pygame.image.load("Chapter12/image/effect_b.png")
 ]
 
+# 効果音の読み込み
+se = [ 
+    pygame.mixer.Sound("Chapter12/sound/ohd_se_attack.ogg"),
+    pygame.mixer.Sound("Chapter12/sound/ohd_se_blaze.ogg"),
+    pygame.mixer.Sound("Chapter12/sound/ohd_se_potion.ogg"),
+    pygame.mixer.Sound("Chapter12/sound/ohd_jin_gameover.ogg"),
+    pygame.mixer.Sound("Chapter12/sound/ohd_jin_levup.ogg"),
+    pygame.mixer.Sound("Chapter12/sound/ohd_jin_win.ogg")
+]
+
+
 # 変数の宣言
 speed = 3
 idx = Idx.TITLE
@@ -106,6 +117,10 @@ emy_blink = 0
 
 dmg_eff = 0
 btl_cmd = 0
+
+dmg = 0
+lif_p = 0
+str_p = 0
 
 COMMAND = ["[A]ttack", "[P]otion", "[B]laze gem", "[R]un"]
 TRE_NAME = ["Potion", "Blaze gem", "Food spoiled.", "Food +20", "Food +100"]
@@ -388,7 +403,7 @@ def set_message(msg):
         message[i] = message[i+1]
     message[9] = msg
 
-def scene_title():
+def scene_title(): # タイトル画面
     global screen, font, fontS, key
     global idx, tmr
     global floor, welcome, pl_lifemax, pl_life, pl_str, food, potion, blazegem
@@ -412,10 +427,11 @@ def scene_title():
         potion = 0
         blazegem = 0
         idx = Idx.FIELD_WFI
+        tmr = 0
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
         pygame.mixer_music.play(-1)
 
-def scene_field_wfi():
+def scene_field_wfi(): # プレイヤーの移動
     global welcome
     move_player(key)
     draw_dungeon(screen, fontS)
@@ -424,30 +440,250 @@ def scene_field_wfi():
         welcome -= 1
         draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
 
+def scene_on_stairs(): # 画面切り替え
+    global idx, floor, fl_max, welcome
+    draw_dungeon(screen, fontS)
+    if 1 <= tmr and tmr <= 5:
+        h = 80*tmr
+        pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
+        pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
+    if tmr == 5:
+        floor += 1
+        if floor > fl_max:
+            fl_max = floor
+        welcome = 15
+        make_dungeon()
+        put_event()
+    if 6 <= tmr and tmr <= 9:
+        h = 80*(10-tmr)
+        pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
+        pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
+    if tmr == 10:
+        idx = Idx.FIELD_WFI
+
+def scene_on_item(): # アイテム入手もしくはトラップ
+    global idx
+    draw_dungeon(screen, fontS)
+    screen.blit(imgItem[treasure], [320, 220])
+    draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
+    if tmr == 10:
+        idx = Idx.FIELD_WFI
+
+def scene_game_over(): # ゲームオーバー
+    global idx, tmr, pl_a
+    if tmr <= 30:
+        PL_TURN = [2, 4, 0, 6]
+        pl_a = PL_TURN[tmr%4]
+        if tmr == 30: pl_a = 8 # 倒れた絵
+        draw_dungeon(screen, fontS)
+    elif tmr == 31:
+        se[3].play()
+        draw_text(screen, "You died.", 360, 240, font, RED)
+        draw_text(screen, "Game over.", 360, 380, font, RED)
+    elif tmr == 100:
+        idx = Idx.TITLE
+        tmr = 0
+
+def scene_on_enemy(): # 戦闘準備
+    global idx, tmr
+    if tmr == 1:
+        pygame.mixer.music.load("Chapter12/sound/ohd_bgm_battle.ogg")
+        pygame.mixer.music.play(-1)
+        init_battle()
+        init_message()
+    elif tmr <= 4:
+        bx = (4-tmr)*220
+        by = 0
+        screen.blit(imgBtlBG, [bx, by])
+        draw_text(screen, "Encounter!", 350, 200, font, WHITE)
+    elif tmr <= 16:
+        draw_battle(screen, fontS)
+        draw_text(screen, emy_name+" appear!", 300, 200, font, WHITE)
+    else:
+        idx = Idx.BATTLE_WFI
+        tmr = 0
+
+def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
+    global idx, tmr
+    draw_battle(screen, fontS)
+    if tmr == 1: set_message("Your turn.")
+    if battle_command(screen, font, key) == True:
+        if btl_cmd == 0:
+            idx = Idx.ATTACK
+            tmr = 0
+        if btl_cmd == 1 and potion > 0:
+            idx = Idx.POTION
+            tmr = 0
+        if btl_cmd == 2 and blazegem > 0:
+            idx = Idx.BLAZE_GEM
+            tmr = 0
+        if btl_cmd == 3:
+            idx = Idx.ESCAPE
+            tmr = 0
+
+def scene_attack(): # プレイヤーの攻撃
+    global idx, tmr, dmg, emy_blink, emy_life
+    draw_battle(screen, fontS)
+    if tmr == 1:
+        set_message("You attack!")
+        se[0].play()
+        dmg = pl_str + random.randint(0, 9)
+    if 2 <= tmr and tmr <= 4:
+        screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
+    if tmr == 5:
+        emy_blink = 5
+        set_message(str(dmg)+"pts of damage!")
+    if tmr == 11:
+        emy_life -= dmg
+        if emy_life <= 0:
+            emy_life = 0
+            idx = Idx.WIN
+            tmr = 0
+    if tmr == 16:
+        idx = Idx.ENEMY_TURN
+        tmr = 0
+
+def scene_enemy_turn(): # 敵のターン、敵の攻撃
+    global idx, tmr, emy_step, dmg, dmg_eff, pl_life
+    draw_battle(screen, fontS)
+    if tmr == 1:
+        set_message("Enemy turn.")
+    if tmr == 5:
+        set_message(emy_name + " attack!")
+        se[0].play()
+        emy_step = 30
+    if tmr == 9:
+        dmg = emy_str + random.randint(0, 9)
+        set_message(str(dmg)+"pts of damage!")
+        dmg_eff = 5
+        emy_step = 0
+    if tmr == 15:
+        pl_life -= dmg
+        if pl_life < 0:
+            pl_life = 0
+            idx = Idx.LOSE
+            tmr = 0
+    if tmr == 20:
+        idx = Idx.BATTLE_WFI
+        tmr = 0
+
+def scene_escape(): # 逃げられる？
+    global idx, tmr
+    draw_battle(screen, fontS)
+    if tmr == 1: set_message("…")
+    if tmr == 2: set_message("……")
+    if tmr == 3: set_message("………")
+    if tmr == 4: set_message("…………")
+    if tmr == 5:
+        if random.randint(0, 99) < 60:
+            idx = Idx.BATTLE_END
+        else:
+            set_message("You failed to flee.")
+    if tmr == 10:
+        idx = Idx.ENEMY_TURN
+        tmr = 0
+
+def scene_lose(): # 敗北
+    global idx, tmr
+    draw_battle(screen, fontS)
+    if tmr == 1:
+        pygame.mixer.music.stop()
+        set_message("You lose.")
+    if tmr == 11:
+        idx = Idx.GAME_OVER
+        tmr = 29
+
+def scene_win(): # 勝利
+    global idx, tmr
+    draw_battle(screen, fontS)
+    if tmr == 1:
+        set_message("you win!")
+        pygame.mixer.music.stop()
+        se[5].play()
+    if tmr == 28:
+        idx = Idx.BATTLE_END
+        if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
+            idx = Idx.LEVEL_UP
+            tmr = 0
+
+def scene_level_up(): # レベルアップ
+    global idx, tmr, pl_lifemax, pl_str
+    draw_battle(screen, fontS)
+    if tmr == 1:
+        set_message("Level up!")
+        se[4].play()
+    if tmr == 21:
+        lif_p = random.randint(10, 20)
+        set_message("Max life + "+str(lif_p))
+        pl_lifemax += lif_p
+    if tmr == 26:
+        str_p = random.randint(5, 10)
+        set_message("Str + "+str(str_p))
+        pl_str += str_p
+    if tmr == 50:
+        idx = Idx.BATTLE_END
+
+def scene_potion(): # Potion
+    global idx, tmr, pl_life, potion
+    draw_battle(screen, fontS)
+    if tmr == 1:
+        set_message("Potion!")
+        se[2].play()
+    if tmr == 6:
+        pl_life = pl_lifemax
+        potion -= 1
+    if tmr == 11:
+        idx = Idx.ENEMY_TURN
+        tmr = 0
+
+def scene_blaze_gem(): # Blaze gem
+    global idx, tmr, blazegem, dmg
+    draw_battle(screen, fontS)
+    img_rz = pygame.transform.rotozoom(imgEffect[1], 30*tmr, (12-tmr)/8)
+    X = 440-img_rz.get_width()/2
+    Y = 360-img_rz.get_height()/2
+    screen.blit(img_rz, [X, Y])
+    if tmr == 1:
+        set_message("Blaze gem!")
+        se[1].play()
+    if tmr == 6:
+        blazegem -= 1
+    if tmr == 11:
+        dmg = 1000
+        idx = Idx.ATTACK
+        tmr = 4
+
+def scene_battle_end(): # 戦闘終了
+    global idx, tmr
+    pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
+    pygame.mixer.music.play(-1)
+    idx = Idx.FIELD_WFI
+
 scenes = {}
 scenes[Idx.TITLE] = scene_title
 scenes[Idx.FIELD_WFI] = scene_field_wfi
-# print(scenes)
+scenes[Idx.ON_STAIRS] = scene_on_stairs
+scenes[Idx.ON_ITEM] = scene_on_item
+scenes[Idx.GAME_OVER] = scene_game_over
+scenes[Idx.ON_ENEMY] = scene_on_enemy
+scenes[Idx.BATTLE_WFI] = scene_battle_wfi
+scenes[Idx.ATTACK] = scene_attack
+scenes[Idx.ENEMY_TURN] = scene_enemy_turn
+scenes[Idx.ESCAPE] = scene_escape
+scenes[Idx.LOSE] = scene_lose
+scenes[Idx.WIN] = scene_win
+scenes[Idx.LEVEL_UP] = scene_level_up
+scenes[Idx.POTION] = scene_potion
+scenes[Idx.BLAZE_GEM] = scene_blaze_gem
+scenes[Idx.BATTLE_END] = scene_battle_end
 
 def main(): # メイン処理
     global screen, font, fontS, key, scenes
     global speed, idx, tmr, floor, fl_max, welcome
     global pl_a, pl_lifemax, pl_life, pl_str, food, potion, blazegem
     global emy_life, emy_step, emy_blink, dmg_eff
-    dmg = 0
-    lif_p = 0
-    str_p = 0
 
     clock = pygame.time.Clock()
-
-    se = [ # 効果音とジングル
-        pygame.mixer.Sound("Chapter12/sound/ohd_se_attack.ogg"),
-        pygame.mixer.Sound("Chapter12/sound/ohd_se_blaze.ogg"),
-        pygame.mixer.Sound("Chapter12/sound/ohd_se_potion.ogg"),
-        pygame.mixer.Sound("Chapter12/sound/ohd_jin_gameover.ogg"),
-        pygame.mixer.Sound("Chapter12/sound/ohd_jin_levup.ogg"),
-        pygame.mixer.Sound("Chapter12/sound/ohd_jin_win.ogg")
-    ]
 
     for i, scene in scenes.items():
         print(i, scene)
@@ -467,223 +703,9 @@ def main(): # メイン処理
         tmr += 1
         key = pygame.key.get_pressed()
 
-        # if idx == Idx.TITLE: scene_title() # タイトル画面
         for i, scene in scenes.items():
             if idx == i: scene()
-        
-        # if idx == Idx.FIELD_WFI: # プレイヤーの移動
-        #     move_player(key)
-        #     draw_dungeon(screen, fontS)
-        #     draw_text(screen, "floor {} ({},{})".format(floor, pl_x, pl_y), 60, 40, fontS, WHITE)
-        #     if welcome > 0:
-        #         welcome -= 1
-        #         draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
-        
-        if idx == Idx.ON_STAIRS: # 画面切り替え
-            draw_dungeon(screen, fontS)
-            if 1 <= tmr and tmr <= 5:
-                h = 80*tmr
-                pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
-                pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
-            if tmr == 5:
-                floor += 1
-                if floor > fl_max:
-                    fl_max = floor
-                welcome = 15
-                make_dungeon()
-                put_event()
-            if 6 <= tmr and tmr <= 9:
-                h = 80*(10-tmr)
-                pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
-                pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
-            if tmr == 10:
-                idx = Idx.FIELD_WFI
-        
-        elif idx == Idx.ON_ITEM: # アイテム入手もしくはトラップ
-            draw_dungeon(screen, fontS)
-            screen.blit(imgItem[treasure], [320, 220])
-            draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
-            if tmr == 10:
-                idx = Idx.FIELD_WFI
-        
-        elif idx == Idx.GAME_OVER: # ゲームオーバー
-            if tmr <= 30:
-                PL_TURN = [2, 4, 0, 6]
-                pl_a = PL_TURN[tmr%4]
-                if tmr == 30: pl_a = 8 # 倒れた絵
-                draw_dungeon(screen, fontS)
-            elif tmr == 31:
-                se[3].play()
-                draw_text(screen, "You died.", 360, 240, font, RED)
-                draw_text(screen, "Game over.", 360, 380, font, RED)
-            elif tmr == 100:
-                idx = Idx.TITLE
-                tmr = 0
-        
-        elif idx == Idx.ON_ENEMY: # 戦闘準備
-            if tmr == 1:
-                pygame.mixer.music.load("Chapter12/sound/ohd_bgm_battle.ogg")
-                pygame.mixer.music.play(-1)
-                init_battle()
-                init_message()
-            elif tmr <= 4:
-                bx = (4-tmr)*220
-                by = 0
-                screen.blit(imgBtlBG, [bx, by])
-                draw_text(screen, "Encounter!", 350, 200, font, WHITE)
-            elif tmr <= 16:
-                draw_battle(screen, fontS)
-                draw_text(screen, emy_name+" appear!", 300, 200, font, WHITE)
-            else:
-                idx = Idx.BATTLE_WFI
-                tmr = 0
-        
-        elif idx == Idx.BATTLE_WFI: # プレイヤーのターン(入力待ち)
-            draw_battle(screen, fontS)
-            if tmr == 1: set_message("Your turn.")
-            if battle_command(screen, font, key) == True:
-                if btl_cmd == 0:
-                    idx = Idx.ATTACK
-                    tmr = 0
-                if btl_cmd == 1 and potion > 0:
-                    idx = Idx.POTION
-                    tmr = 0
-                if btl_cmd == 2 and blazegem > 0:
-                    idx = Idx.BLAZE_GEM
-                    tmr = 0
-                if btl_cmd == 3:
-                    idx = Idx.ESCAPE
-                    tmr = 0
-        
-        elif idx == Idx.ATTACK: # プレイヤーの攻撃
-            draw_battle(screen, fontS)
-            if tmr == 1:
-                set_message("You attack!")
-                se[0].play()
-                dmg = pl_str + random.randint(0, 9)
-            if 2 <= tmr and tmr <= 4:
-                screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
-            if tmr == 5:
-                emy_blink = 5
-                set_message(str(dmg)+"pts of damage!")
-            if tmr == 11:
-                emy_life -= dmg
-                if emy_life <= 0:
-                    emy_life = 0
-                    idx = Idx.WIN
-                    tmr = 0
-            if tmr == 16:
-                idx = Idx.ENEMY_TURN
-                tmr = 0
-        
-        elif idx == Idx.ENEMY_TURN: # 敵のターン、敵の攻撃
-            draw_battle(screen, fontS)
-            if tmr == 1:
-                set_message("Enemy turn.")
-            if tmr == 5:
-                set_message(emy_name + " attack!")
-                se[0].play()
-                emy_step = 30
-            if tmr == 9:
-                dmg = emy_str + random.randint(0, 9)
-                set_message(str(dmg)+"pts of damage!")
-                dmg_eff = 5
-                emy_step = 0
-            if tmr == 15:
-                pl_life -= dmg
-                if pl_life < 0:
-                    pl_life = 0
-                    idx = Idx.LOSE
-                    tmr = 0
-            if tmr == 20:
-                idx = Idx.BATTLE_WFI
-                tmr = 0
-        
-        elif idx == Idx.ESCAPE: # 逃げられる？
-            draw_battle(screen, fontS)
-            if tmr == 1: set_message("…")
-            if tmr == 2: set_message("……")
-            if tmr == 3: set_message("………")
-            if tmr == 4: set_message("…………")
-            if tmr == 5:
-                if random.randint(0, 99) < 60:
-                    idx = Idx.BATTLE_END
-                else:
-                    set_message("You failed to flee.")
-            if tmr == 10:
-                idx = Idx.ENEMY_TURN
-                tmr = 0
-        
-        elif idx == Idx.LOSE: # 敗北
-            draw_battle(screen, fontS)
-            if tmr == 1:
-                pygame.mixer.music.stop()
-                set_message("You lose.")
-            if tmr == 11:
-                idx = Idx.GAME_OVER
-                tmr = 29
-        
-        elif idx == Idx.WIN: # 勝利
-            draw_battle(screen, fontS)
-            if tmr == 1:
-                set_message("you win!")
-                pygame.mixer.music.stop()
-                se[5].play()
-            if tmr == 28:
-                idx = Idx.BATTLE_END
-                if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
-                    idx = Idx.LEVEL_UP
-                    tmr = 0
-        
-        elif idx == Idx.LEVEL_UP: # レベルアップ
-            draw_battle(screen, fontS)
-            if tmr == 1:
-                set_message("Level up!")
-                se[4].play()
-                lif_p = random.randint(10, 20)
-                str_p = random.randint(5, 10)
-            if tmr == 21:
-                set_message("Max life + "+str(lif_p))
-                pl_lifemax += lif_p
-            if tmr == 26:
-                set_message("Str + "+str(str_p))
-                pl_str += str_p
-            if tmr == 50:
-                idx = Idx.BATTLE_END
-        
-        elif idx == Idx.POTION: # Potion
-            draw_battle(screen, fontS)
-            if tmr == 1:
-                set_message("Potion!")
-                se[2].play()
-            if tmr == 6:
-                pl_life = pl_lifemax
-                potion -= 1
-            if tmr == 11:
-                idx = Idx.ENEMY_TURN
-                tmr = 0
-        
-        elif idx == Idx.BLAZE_GEM: # Blaze gem
-            draw_battle(screen, fontS)
-            img_rz = pygame.transform.rotozoom(imgEffect[1], 30*tmr, (12-tmr)/8)
-            X = 440-img_rz.get_width()/2
-            Y = 360-img_rz.get_heigth()/2
-            screen.blit(img_rz, [X, Y])
-            if tmr == 1:
-                set_message("Blaze gem!")
-                se[1].play()
-            if tmr == 6:
-                blazegem -= 1
-            if tmr == 11:
-                dmg = 1000
-                idx = Idx.ATTACK
-                tmr = 4
-        
-        elif idx == Idx.BATTLE_END: # 戦闘終了
-            pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
-            pygame.mixer.music.play(-1)
-            idx = Idx.FIELD_WFI
-        
+                
         draw_text(screen, "[S]peed "+str(speed), 740, 40, fontS, WHITE)
 
         pygame.display.update()
