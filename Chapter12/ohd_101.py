@@ -15,15 +15,26 @@ EMY_NAME = [
 
 MAZE_W = 11
 MAZE_H = 9
-maze = []
-for y in range(MAZE_H):
-    maze.append([0]*MAZE_W)
+maze = [[0]*MAZE_W for i in range(MAZE_H)]
+# maze = []
+# for y in range(MAZE_H):
+#     maze.append([0]*MAZE_W)
 
 DUNGEON_W = MAZE_W*3
 DUNGEON_H = MAZE_H*3
-dungeon = []
-for y in range(DUNGEON_H):
-    dungeon.append([0]*DUNGEON_W)
+# dungeon = []
+# for y in range(DUNGEON_H):
+#     dungeon.append([0]*DUNGEON_W)
+
+# squares = [i**2 for i in range(5)]
+# print(squares)
+# # [0, 1, 4, 9, 16]
+
+dungeon = [[0]*DUNGEON_W for i in range(DUNGEON_H)]
+# print("Dungeon")
+# print(dungeon)
+# dungeon = []*DUNGEON_H
+
 
 def make_dungeon(): # ダンジョンの自動生成
     XP = [ 0, 1, 0,-1]
@@ -566,8 +577,8 @@ def main(): # メイン処理
 
     clock = pygame.time.Clock()
 
-    for i, scene in scenes.items():
-        print(i, scene)
+    # for i, scene in scenes.items():
+    #     print(i, scene)
 
     while True:
         for event in pygame.event.get():
