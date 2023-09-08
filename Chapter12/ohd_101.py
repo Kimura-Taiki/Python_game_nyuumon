@@ -13,8 +13,7 @@ from mod.pginit import screen, font, fontS, key
 # key = pygame.key.get_pressed()
 
 # idxの中身を定義
-from mod.idx import Idx
-print(Idx)
+from mod.idx import *
 
 # 色の定義
 WHITE = (255, 255, 255)
