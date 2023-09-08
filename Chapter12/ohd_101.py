@@ -415,8 +415,22 @@ def scene_title():
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
         pygame.mixer_music.play(-1)
 
+def scene_field_wfi():
+    global welcome
+    move_player(key)
+    draw_dungeon(screen, fontS)
+    draw_text(screen, "floor {} ({},{})".format(floor, pl_x, pl_y), 60, 40, fontS, WHITE)
+    if welcome > 0:
+        welcome -= 1
+        draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
+
+scenes = {}
+scenes[Idx.TITLE] = scene_title
+scenes[Idx.FIELD_WFI] = scene_field_wfi
+# print(scenes)
+
 def main(): # メイン処理
-    global screen, font, fontS, key
+    global screen, font, fontS, key, scenes
     global speed, idx, tmr, floor, fl_max, welcome
     global pl_a, pl_lifemax, pl_life, pl_str, food, potion, blazegem
     global emy_life, emy_step, emy_blink, dmg_eff
@@ -424,12 +438,7 @@ def main(): # メイン処理
     lif_p = 0
     str_p = 0
 
-    # pygame.init()
-    # pygame.display.set_caption("One hour Dungeon")
-    screen = pygame.display.set_mode((880, 720))
     clock = pygame.time.Clock()
-    font = pygame.font.Font(None, 40)
-    fontS = pygame.font.Font(None, 30)
 
     se = [ # 効果音とジングル
         pygame.mixer.Sound("Chapter12/sound/ohd_se_attack.ogg"),
@@ -440,8 +449,9 @@ def main(): # メイン処理
         pygame.mixer.Sound("Chapter12/sound/ohd_jin_win.ogg")
     ]
 
-    tatoe = {Idx.TITLE: scene_title}
-    print(tatoe[Idx.TITLE])
+    for i, scene in scenes.items():
+        print(i, scene)
+
 
     while True:
         for event in pygame.event.get():
@@ -456,19 +466,20 @@ def main(): # メイン処理
         
         tmr += 1
         key = pygame.key.get_pressed()
-        # status = {"screen": screen, "font": font, "fontS": fontS, "key": key}
 
-        if idx == Idx.TITLE: scene_title() # タイトル画面
+        # if idx == Idx.TITLE: scene_title() # タイトル画面
+        for i, scene in scenes.items():
+            if idx == i: scene()
         
-        elif idx == Idx.FIELD_WFI: # プレイヤーの移動
-            move_player(key)
-            draw_dungeon(screen, fontS)
-            draw_text(screen, "floor {} ({},{})".format(floor, pl_x, pl_y), 60, 40, fontS, WHITE)
-            if welcome > 0:
-                welcome -= 1
-                draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
+        # if idx == Idx.FIELD_WFI: # プレイヤーの移動
+        #     move_player(key)
+        #     draw_dungeon(screen, fontS)
+        #     draw_text(screen, "floor {} ({},{})".format(floor, pl_x, pl_y), 60, 40, fontS, WHITE)
+        #     if welcome > 0:
+        #         welcome -= 1
+        #         draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
         
-        elif idx == Idx.ON_STAIRS: # 画面切り替え
+        if idx == Idx.ON_STAIRS: # 画面切り替え
             draw_dungeon(screen, fontS)
             if 1 <= tmr and tmr <= 5:
                 h = 80*tmr
