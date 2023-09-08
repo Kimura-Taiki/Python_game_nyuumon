@@ -1,5 +1,9 @@
 import pygame
 from pygame.locals import *
+from ..idx import Idx
+from ..pginit import * #screen, font, fontS, key
+from ..color import * #BLACK, BLINK
+from ..image import *
 
 def scene_title(): # タイトル画面
     global screen, font, fontS, key
