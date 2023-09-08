@@ -380,18 +380,18 @@ def set_message(msg):
         message[i] = message[i+1]
     message[9] = msg
 
-def scene_title(tmr):
-    global idx
+def scene_title(status):
+    global idx, tmr
     global floor, welcome, pl_lifemax, pl_life, pl_str, food, potion, blazegem
     if tmr == 1:
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_title.ogg")
         pygame.mixer.music.play(-1)
-    screen.fill(BLACK)
-    screen.blit(imgTitle, [40, 60])
+    status["screen"].fill(BLACK)
+    status["screen"].blit(imgTitle, [40, 60])
     if fl_max  >= 2:
-        draw_text(screen, "You reached floor {}.".format(fl_max), 300, 460, font, CYAN)
-    draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
-    if key[K_SPACE] == 1:
+        draw_text(status["screen"], "You reached floor {}.".format(fl_max), 300, 460, status["font"], CYAN)
+    draw_text(status["screen"], "Press space key", 320, 560, status["font"], BLINK[tmr%6])
+    if status["key"][K_SPACE] == 1:
         make_dungeon()
         put_event()
         floor = 1
@@ -405,7 +405,6 @@ def scene_title(tmr):
         idx = Idx.FIELD_WFI
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
         pygame.mixer_music.play(-1)
-
 
 def main(): # メイン処理
     global speed, idx, tmr, floor, fl_max, welcome
@@ -431,7 +430,8 @@ def main(): # メイン処理
         pygame.mixer.Sound("Chapter12/sound/ohd_jin_win.ogg")
     ]
 
-
+    tatoe = {Idx.TITLE: scene_title}
+    print(tatoe[Idx.TITLE])
 
     while True:
         for event in pygame.event.get():
@@ -446,30 +446,9 @@ def main(): # メイン処理
         
         tmr += 1
         key = pygame.key.get_pressed()
+        status = {"screen": screen, "font": font, "fontS": fontS, "key": key}
 
-        if idx == Idx.TITLE: # タイトル画面
-            if tmr == 1:
-                pygame.mixer.music.load("Chapter12/sound/ohd_bgm_title.ogg")
-                pygame.mixer.music.play(-1)
-            screen.fill(BLACK)
-            screen.blit(imgTitle, [40, 60])
-            if fl_max  >= 2:
-                draw_text(screen, "You reached floor {}.".format(fl_max), 300, 460, font, CYAN)
-            draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
-            if key[K_SPACE] == 1:
-                make_dungeon()
-                put_event()
-                floor = 1
-                welcome = 15
-                pl_lifemax = 300
-                pl_life = pl_lifemax
-                pl_str = 100
-                food = 300
-                potion = 0
-                blazegem = 0
-                idx = Idx.FIELD_WFI
-                pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
-                pygame.mixer_music.play(-1)
+        if idx == Idx.TITLE: scene_title(status=status) # タイトル画面
         
         elif idx == Idx.FIELD_WFI: # プレイヤーの移動
             move_player(key)
