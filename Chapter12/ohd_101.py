@@ -5,15 +5,9 @@ from pygame.locals import *
 
 # mainループ中で利用する変数を大域化
 from mod.pginit import screen, font, fontS, key
-# pygame.init()
-# pygame.display.set_caption("One hour Dungeon")
-# screen = pygame.display.set_mode((880, 720))
-# font = pygame.font.Font(None, 40)
-# fontS = pygame.font.Font(None, 30)
-# key = pygame.key.get_pressed()
 
 # idxの中身を定義
-from mod.idx import *
+from mod.idx import Idx
 
 # 色の定義
 WHITE = (255, 255, 255)
@@ -60,7 +54,6 @@ imgEffect = [
 ]
 
 # 効果音の読み込み
-pygame.mixer.music.set_volume(0.1)
 se = [ 
     pygame.mixer.Sound("Chapter12/sound/ohd_se_attack.ogg"),
     pygame.mixer.Sound("Chapter12/sound/ohd_se_blaze.ogg"),
@@ -69,6 +62,9 @@ se = [
     pygame.mixer.Sound("Chapter12/sound/ohd_jin_levup.ogg"),
     pygame.mixer.Sound("Chapter12/sound/ohd_jin_win.ogg")
 ]
+for sound in se:
+    sound.set_volume(0.1)
+pygame.mixer.music.set_volume(0.1)
 
 
 # 変数の宣言
