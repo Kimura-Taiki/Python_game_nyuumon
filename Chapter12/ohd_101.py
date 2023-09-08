@@ -2,7 +2,6 @@ import pygame
 import sys
 import random
 from pygame.locals import *
-from enum import Enum
 
 # mainループ中で利用する変数を大域化
 pygame.init()
@@ -13,23 +12,24 @@ fontS = pygame.font.Font(None, 30)
 key = pygame.key.get_pressed()
 
 # idxの中身を定義
-class Idx(Enum):
-    TITLE = 0
-    FIELD_WFI = 1
-    ON_STAIRS = 2
-    ON_ITEM = 3
-    GAME_OVER = 9
-    ON_ENEMY = 10
-    BATTLE_WFI = 11
-    ATTACK = 12
-    ENEMY_TURN = 13
-    ESCAPE = 14
-    LOSE = 15
-    WIN = 16
-    LEVEL_UP = 17
-    POTION = 20
-    BLAZE_GEM = 21
-    BATTLE_END = 22
+from mod.idx import Idx
+# class Idx(Enum):
+#     TITLE = 0
+#     FIELD_WFI = 1
+#     ON_STAIRS = 2
+#     ON_ITEM = 3
+#     GAME_OVER = 9
+#     ON_ENEMY = 10
+#     BATTLE_WFI = 11
+#     ATTACK = 12
+#     ENEMY_TURN = 13
+#     ESCAPE = 14
+#     LOSE = 15
+#     WIN = 16
+#     LEVEL_UP = 17
+#     POTION = 20
+#     BLAZE_GEM = 21
+#     BATTLE_END = 22
 
 # 色の定義
 WHITE = (255, 255, 255)
@@ -678,16 +678,16 @@ scenes[Idx.BLAZE_GEM] = scene_blaze_gem
 scenes[Idx.BATTLE_END] = scene_battle_end
 
 def main(): # メイン処理
-    global screen, font, fontS, key, scenes
-    global speed, idx, tmr, floor, fl_max, welcome
-    global pl_a, pl_lifemax, pl_life, pl_str, food, potion, blazegem
-    global emy_life, emy_step, emy_blink, dmg_eff
+    # global screen, font, fontS, key, scenes
+    # global speed, idx, tmr, floor, fl_max, welcome
+    # global pl_a, pl_lifemax, pl_life, pl_str, food, potion, blazegem
+    # global emy_life, emy_step, emy_blink, dmg_eff
+    global key, tmr, speed
 
     clock = pygame.time.Clock()
 
     for i, scene in scenes.items():
         print(i, scene)
-
 
     while True:
         for event in pygame.event.get():
@@ -704,7 +704,9 @@ def main(): # メイン処理
         key = pygame.key.get_pressed()
 
         for i, scene in scenes.items():
-            if idx == i: scene()
+            if idx == i:
+                scene()
+                break
                 
         draw_text(screen, "[S]peed "+str(speed), 740, 40, fontS, WHITE)
 
