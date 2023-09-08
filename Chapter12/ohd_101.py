@@ -4,6 +4,14 @@ import random
 from pygame.locals import *
 from enum import Enum
 
+# mainループ中で利用する変数を大域化
+pygame.init()
+pygame.display.set_caption("One hour Dungeon")
+screen = pygame.display.set_mode((880, 720))
+font = pygame.font.Font(None, 40)
+fontS = pygame.font.Font(None, 30)
+key = pygame.key.get_pressed()
+
 # idxの中身を定義
 class Idx(Enum):
     TITLE = 0
@@ -68,7 +76,7 @@ imgEffect = [
 ]
 
 # 変数の宣言
-speed = 1
+speed = 3
 idx = Idx.TITLE
 tmr = 0
 floor = 0
@@ -380,18 +388,19 @@ def set_message(msg):
         message[i] = message[i+1]
     message[9] = msg
 
-def scene_title(status):
+def scene_title():
+    global screen, font, fontS, key
     global idx, tmr
     global floor, welcome, pl_lifemax, pl_life, pl_str, food, potion, blazegem
     if tmr == 1:
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_title.ogg")
         pygame.mixer.music.play(-1)
-    status["screen"].fill(BLACK)
-    status["screen"].blit(imgTitle, [40, 60])
+    screen.fill(BLACK)
+    screen.blit(imgTitle, [40, 60])
     if fl_max  >= 2:
-        draw_text(status["screen"], "You reached floor {}.".format(fl_max), 300, 460, status["font"], CYAN)
-    draw_text(status["screen"], "Press space key", 320, 560, status["font"], BLINK[tmr%6])
-    if status["key"][K_SPACE] == 1:
+        draw_text(screen, "You reached floor {}.".format(fl_max), 300, 460, font, CYAN)
+    draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
+    if key[K_SPACE] == 1:
         make_dungeon()
         put_event()
         floor = 1
@@ -407,6 +416,7 @@ def scene_title(status):
         pygame.mixer_music.play(-1)
 
 def main(): # メイン処理
+    global screen, font, fontS, key
     global speed, idx, tmr, floor, fl_max, welcome
     global pl_a, pl_lifemax, pl_life, pl_str, food, potion, blazegem
     global emy_life, emy_step, emy_blink, dmg_eff
@@ -414,8 +424,8 @@ def main(): # メイン処理
     lif_p = 0
     str_p = 0
 
-    pygame.init()
-    pygame.display.set_caption("One hour Dungeon")
+    # pygame.init()
+    # pygame.display.set_caption("One hour Dungeon")
     screen = pygame.display.set_mode((880, 720))
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 40)
@@ -446,9 +456,9 @@ def main(): # メイン処理
         
         tmr += 1
         key = pygame.key.get_pressed()
-        status = {"screen": screen, "font": font, "fontS": fontS, "key": key}
+        # status = {"screen": screen, "font": font, "fontS": fontS, "key": key}
 
-        if idx == Idx.TITLE: scene_title(status=status) # タイトル画面
+        if idx == Idx.TITLE: scene_title() # タイトル画面
         
         elif idx == Idx.FIELD_WFI: # プレイヤーの移動
             move_player(key)
