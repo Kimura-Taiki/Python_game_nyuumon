@@ -4,32 +4,17 @@ import random
 from pygame.locals import *
 
 # mainループ中で利用する変数を大域化
-pygame.init()
-pygame.display.set_caption("One hour Dungeon")
-screen = pygame.display.set_mode((880, 720))
-font = pygame.font.Font(None, 40)
-fontS = pygame.font.Font(None, 30)
-key = pygame.key.get_pressed()
+from mod.pginit import screen, font, fontS, key
+# pygame.init()
+# pygame.display.set_caption("One hour Dungeon")
+# screen = pygame.display.set_mode((880, 720))
+# font = pygame.font.Font(None, 40)
+# fontS = pygame.font.Font(None, 30)
+# key = pygame.key.get_pressed()
 
 # idxの中身を定義
 from mod.idx import Idx
-# class Idx(Enum):
-#     TITLE = 0
-#     FIELD_WFI = 1
-#     ON_STAIRS = 2
-#     ON_ITEM = 3
-#     GAME_OVER = 9
-#     ON_ENEMY = 10
-#     BATTLE_WFI = 11
-#     ATTACK = 12
-#     ENEMY_TURN = 13
-#     ESCAPE = 14
-#     LOSE = 15
-#     WIN = 16
-#     LEVEL_UP = 17
-#     POTION = 20
-#     BLAZE_GEM = 21
-#     BATTLE_END = 22
+print(Idx)
 
 # 色の定義
 WHITE = (255, 255, 255)
@@ -76,6 +61,7 @@ imgEffect = [
 ]
 
 # 効果音の読み込み
+pygame.mixer.music.set_volume(0.1)
 se = [ 
     pygame.mixer.Sound("Chapter12/sound/ohd_se_attack.ogg"),
     pygame.mixer.Sound("Chapter12/sound/ohd_se_blaze.ogg"),
@@ -678,10 +664,6 @@ scenes[Idx.BLAZE_GEM] = scene_blaze_gem
 scenes[Idx.BATTLE_END] = scene_battle_end
 
 def main(): # メイン処理
-    # global screen, font, fontS, key, scenes
-    # global speed, idx, tmr, floor, fl_max, welcome
-    # global pl_a, pl_lifemax, pl_life, pl_str, food, potion, blazegem
-    # global emy_life, emy_step, emy_blink, dmg_eff
     global key, tmr, speed
 
     clock = pygame.time.Clock()

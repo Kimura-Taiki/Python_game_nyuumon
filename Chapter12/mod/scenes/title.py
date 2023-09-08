@@ -1,4 +1,7 @@
-def scene_title():
+import pygame
+from pygame.locals import *
+
+def scene_title(): # タイトル画面
     global screen, font, fontS, key
     global idx, tmr
     global floor, welcome, pl_lifemax, pl_life, pl_str, food, potion, blazegem
@@ -22,5 +25,6 @@ def scene_title():
         potion = 0
         blazegem = 0
         idx = Idx.FIELD_WFI
+        tmr = 0
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
         pygame.mixer_music.play(-1)
