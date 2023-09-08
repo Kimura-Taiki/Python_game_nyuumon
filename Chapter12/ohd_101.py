@@ -16,40 +16,35 @@ EMY_NAME = [
 MAZE_W = 11
 MAZE_H = 9
 maze = [[0]*MAZE_W for i in range(MAZE_H)]
-# maze = []
-# for y in range(MAZE_H):
-#     maze.append([0]*MAZE_W)
 
 DUNGEON_W = MAZE_W*3
 DUNGEON_H = MAZE_H*3
-# dungeon = []
-# for y in range(DUNGEON_H):
-#     dungeon.append([0]*DUNGEON_W)
-
-# squares = [i**2 for i in range(5)]
-# print(squares)
-# # [0, 1, 4, 9, 16]
-
 dungeon = [[0]*DUNGEON_W for i in range(DUNGEON_H)]
-# print("Dungeon")
-# print(dungeon)
-# dungeon = []*DUNGEON_H
 
 
 def make_dungeon(): # ダンジョンの自動生成
     XP = [ 0, 1, 0,-1]
     YP = [-1, 0, 1, 0]
-    #周りの壁
-    for x in range(MAZE_W):
-        maze[0][x] = 1
-        maze[MAZE_H-1][x] = 1
-    for y in range(MAZE_H-1):
-        maze[y][0] = 1
-        maze[y][MAZE_W-1] = 1
-    #中を何もない状態に
-    for y in range(1, MAZE_H-1):
-        for x in range(1, MAZE_W-1):
-            maze[y][x] = 0
+    
+    # odd_even_list = [(x, 'odd') if x % 2 else (x, 'even') for x in r]
+    # print(odd_even_list)
+
+    # #周りの壁
+    # for x in range(MAZE_W):
+    #     maze[0][x] = 1
+    #     maze[MAZE_H-1][x] = 1
+    # for y in range(MAZE_H-1):
+    #     maze[y][0] = 1
+    #     maze[y][MAZE_W-1] = 1
+    # #中を何もない状態に
+    # for y in range(1, MAZE_H-1):
+    #     for x in range(1, MAZE_W-1):
+    #         maze[y][x] = 0
+
+    maze = [[1]*MAZE_W if y==0 or y==MAZE_H-1 else [1]+[0]*(MAZE_W-2)+[1] for y in range(MAZE_H)]
+    # print("----maze----")
+    # print(maze)
+
     #柱
     for y in range(2, MAZE_H-2, 2):
         for x in range(2, MAZE_W-2, 2):
