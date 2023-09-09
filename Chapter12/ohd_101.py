@@ -27,21 +27,14 @@ def make_dungeon(): # ダンジョンの自動生成
     YP = [-1, 0, 1, 0]
     
     #外枠が1で中が0のmazeを作成
-    maze = [[1]*MAZE_W 
-            if y==0 or y==MAZE_H-1 #上下の行は全て1
+    maze = [[1]*MAZE_W #上下の行は全て1
+            if y==0 or y==MAZE_H-1
             else (
                 [1]+[0]*(MAZE_W-2)+[1] #中間行の内、奇数行は左右端が1でそれ以外が0
                 if y%2 == 1
                 else [1]+([0]+[1])*int(MAZE_W/2) #中間行の内、偶数業は1マス毎に柱を入れる
                 )
             for y in range(MAZE_H)]
-    print("----maze----")
-    print(maze)
-
-    # #柱
-    # for y in range(2, MAZE_H-2, 2):
-    #     for x in range(2, MAZE_W-2, 2):
-    #         maze[y][x] = 1
     #柱から上下左右に壁を作る
     for y in range(2, MAZE_H-2, 2):
         for x in range(2, MAZE_W-2, 2):
@@ -51,10 +44,12 @@ def make_dungeon(): # ダンジョンの自動生成
             maze[y+YP[d]][x+XP[d]] = 1
     
     # 迷路からダンジョンを作る
-    #全体を壁にする
+    # dungeon = [[9] for i in range(DUNGEON_W) for j in range(DUNGEON_H)] #全体を壁にする
     for y in range(DUNGEON_H):
         for x in range(DUNGEON_W):
             dungeon[y][x] = 9
+    print("----dungeon----")
+    print(dungeon)
     #部屋と通路の配置
     for y in range(1,MAZE_H-1):
         for x in range(1, MAZE_W-1):
