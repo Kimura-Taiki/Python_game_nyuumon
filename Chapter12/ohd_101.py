@@ -23,6 +23,7 @@ dungeon = [[0]*DUNGEON_W for i in range(DUNGEON_H)]
 
 
 def make_dungeon(): # ダンジョンの自動生成
+    global dungeon
     XP = [ 0, 1, 0,-1]
     YP = [-1, 0, 1, 0]
     
@@ -44,10 +45,10 @@ def make_dungeon(): # ダンジョンの自動生成
             maze[y+YP[d]][x+XP[d]] = 1
     
     # 迷路からダンジョンを作る
-    # dungeon = [[9] for i in range(DUNGEON_W) for j in range(DUNGEON_H)] #全体を壁にする
-    for y in range(DUNGEON_H):
-        for x in range(DUNGEON_W):
-            dungeon[y][x] = 9
+    dungeon = [[9]*DUNGEON_W for i in range(DUNGEON_H)] #全体を壁にする
+    # for y in range(DUNGEON_H):
+    #     for x in range(DUNGEON_W):
+    #         dungeon[y][x] = 9
     print("----dungeon----")
     print(dungeon)
     #部屋と通路の配置
