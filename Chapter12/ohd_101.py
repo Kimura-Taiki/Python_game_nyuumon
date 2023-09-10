@@ -1,3 +1,4 @@
+from functools import reduce
 import pygame
 import sys
 import random
@@ -44,20 +45,33 @@ def make_dungeon(): # ダンジョンの自動生成
                 d = random.randint(0, 2)
             maze[y+YP[d]][x+XP[d]] = 1
     
+    # ダンジョン生成の為の固定maze
+    maze = [[1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,1,0,0,0,0,0,0,0,1],
+            [1,0,1,0,1,0,1,0,1,1,1],
+            [1,0,0,0,1,0,1,0,1,0,1],
+            [1,1,1,0,1,1,1,0,1,0,1],
+            [1,0,1,0,0,0,0,0,0,0,1],
+            [1,0,1,0,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,1,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1]
+            ]
+
     # 迷路からダンジョンを作る
     dungeon = [[9]*DUNGEON_W for i in range(DUNGEON_H)] #全体を壁にする
     # for y in range(DUNGEON_H):
     #     for x in range(DUNGEON_W):
     #         dungeon[y][x] = 9
-    print("----dungeon----")
-    print(dungeon)
+    # print("----dungeon----")
+    # print(dungeon)
     #部屋と通路の配置
     for y in range(1,MAZE_H-1):
         for x in range(1, MAZE_W-1):
             dx = x*3+1
             dy = y*3+1
             if maze[y][x] == 0:
-                if random.randint(0, 99) < 20:
+                # if random.randint(0, 99) < 20:
+                if (y+x)%5 == 0: #マップを固定するために乱数を排除
                     for ry in range(-1, 2):
                         for rx in range(-1, 2):
                             dungeon[dy+ry][dx+rx] = 0
@@ -67,6 +81,10 @@ def make_dungeon(): # ダンジョンの自動生成
                     if maze[y+1][x] == 0: dungeon[dy+1][dx] = 0
                     if maze[y][x-1] == 0: dungeon[dy][dx-1] = 0
                     if maze[y][x+1] == 0: dungeon[dy][dx+1] = 0
+    print("----dungeon----")
+    for y in dungeon:
+        print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx"), y, ""))
+    exit() # ダンジョンを構成したらさっさと終了
 
 def draw_dungeon(bg, fnt): # ダンジョンを描画する
     bg.fill(BLACK)
