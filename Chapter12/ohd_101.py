@@ -57,9 +57,20 @@ def make_dungeon(): # ダンジョンの自動生成
             [1,1,1,1,1,1,1,1,1,1,1]
             ]
 
-    # 迷路からダンジョンを作る
+    # # 迷路からダンジョンを作る
     dungeon = [[9]*DUNGEON_W for j in range(DUNGEON_H)] #全体を壁にする
-    dungeon = [[0 if x==y else i for x, i in enumerate(j)] for y, j in enumerate(dungeon)]
+    dungeon = [[0 if x%3==1 and y%3==1 and maze[int(y/3)][int(x/3)]==0 else i for x, i in enumerate(j)]
+               for y, j in enumerate(dungeon)] #mazeの0地点を空き地に
+    dungeon = [[0 if maze[int(y/3)][int(x/3)]==0 and (int(x/3)**2+int(y/3)**2)%5==0 else i for x, i in enumerate(j)]
+               for y, j in enumerate(dungeon)] #一部0地点を部屋に拡張
+    dungeon = [[0 if x%3==1 and y%3==0 and maze[int(y/3)][int(x/3)]==0 and maze[int(y/3)-1][int(x/3)]==0 else i for x, i in enumerate(j)]
+               for y, j in enumerate(dungeon)] #mazeの0地点同士が縦に並んでいる時、下の空白を道にする
+    dungeon = [[0 if x%3==1 and y%3==2 and maze[int(y/3)][int(x/3)]==0 and maze[int(y/3)+1][int(x/3)]==0 else i for x, i in enumerate(j)]
+               for y, j in enumerate(dungeon)] #mazeの0地点同士が縦に並んでいる時、上の空白を道にする
+    dungeon = [[0 if x%3==0 and y%3==1 and maze[int(y/3)][int(x/3)]==0 and maze[int(y/3)][int(x/3)-1]==0 else i for x, i in enumerate(j)]
+               for y, j in enumerate(dungeon)] #mazeの0地点同士が横に並んでいる時、右の空白を道にする
+    dungeon = [[0 if x%3==2 and y%3==1 and maze[int(y/3)][int(x/3)]==0 and maze[int(y/3)][int(x/3)+1]==0 else i for x, i in enumerate(j)]
+               for y, j in enumerate(dungeon)] #mazeの0地点同士が横に並んでいる時、左の空白を道にする
     # #部屋と通路の配置
     # for y in range(1,MAZE_H-1):
     #     for x in range(1, MAZE_W-1):
@@ -77,10 +88,10 @@ def make_dungeon(): # ダンジョンの自動生成
     #                 if maze[y+1][x] == 0: dungeon[dy+1][dx] = 0
     #                 if maze[y][x-1] == 0: dungeon[dy][dx-1] = 0
     #                 if maze[y][x+1] == 0: dungeon[dy][dx+1] = 0
-    print("----dungeon----")
-    for y in dungeon:
-        print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx"), y, ""))
-    exit() # ダンジョンを構成したらさっさと終了
+    # print("----dungeon----")
+    # for y in dungeon:
+    #     print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx"), y, ""))
+    # exit() # ダンジョンを構成したらさっさと終了
 
 def draw_dungeon(bg, fnt): # ダンジョンを描画する
     bg.fill(BLACK)
