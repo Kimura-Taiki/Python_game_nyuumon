@@ -60,30 +60,32 @@ def make_dungeon(): # ダンジョンの自動生成
 
     mzf = lambda xx, yy :maze[int(yy/3)][int(xx/3)]
     mzfif = lambda xx, yy, arr :reduce(lambda acc, cur: acc or mzf(xx,yy)==cur, arr, False)
-    mzfif2 = lambda xx, yy, dx, dy, arr :mzfif(xx,yy,arr) and mzfif(xx+dx,yy+dy,arr)
+    # mzfif2 = lambda xx, yy, dx, dy, arr :mzfif(xx,yy,arr) and mzfif(xx+dx,yy+dy,arr)
     is_road = lambda xx, yy, dx, dy, arr :xx%3==1+dx and yy%3==1+dy and mzfif(xx,yy,arr) and mzfif(xx+dx,yy+dy,arr)
     # get_odd_even = lambda x: 'even' if x % 2 == 0 else 'odd'
 
-    dungeon = [[9]*DUNGEON_W for j in range(DUNGEON_H)] #全体を壁にする
+    # dungeon = [[9]*DUNGEON_W for j in range(DUNGEON_H)] #全体を壁にする
     # 迷路からダンジョンを作る
-    dungeon = [[0 if x%3==1 and y%3==1 and mzf(x,y)==0 else i for x, i in enumerate(j)]
-               for y, j in enumerate(dungeon)] #mazeの0地点を空き地に
+    # dungeon = [[0 if x%3==1 and y%3==1 and mzf(x,y)==0 else i for x, i in enumerate(j)]
+    #            for y, j in enumerate(dungeon)] #mazeの0地点を空き地に
+    pipeline = [[0,0,[0]], #mazeの0地点を空き地にする
+                [0,-1,[0,2]], #mazeの0地点同士が縦に並んでいる時、下の空白を道にする
+                [0,1,[0,2]], #mazeの0地点同士が縦に並んでいる時、上の空白を道にする
+                [-1,0,[0,2]], #mazeの0地点同士が横に並んでいる時、右の空白を道にする
+                [1,0,[0,2]]] #mazeの0地点同士が横に並んでいる時、左の空白を道にする
+    dungeon = reduce(lambda acc, cur: 
+                     [[0 if is_road(x,y,cur[0],cur[1],cur[2]) else i for x, i in enumerate(j)] 
+                      for y, j in enumerate(acc)], pipeline, [[9]*DUNGEON_W for j in range(DUNGEON_H)])
     dungeon = [[0 if mzf(x,y)==2 else i for x, i in enumerate(j)]
                for y, j in enumerate(dungeon)] #一部0地点を部屋に拡張
-    dungeon = [[0 if is_road(x,y,0,-1,[0,2]) else i for x, i in enumerate(j)]
-               for y, j in enumerate(dungeon)] #mazeの0地点同士が縦に並んでいる時、下の空白を道にする
-    # dungeon = [[0 if x%3==1 and y%3==0 and mzfif2(x,y,0,-1,[0,2]) else i for x, i in enumerate(j)]
+    # dungeon = [[0 if is_road(x,y,0,-1,[0,2]) else i for x, i in enumerate(j)]
     #            for y, j in enumerate(dungeon)] #mazeの0地点同士が縦に並んでいる時、下の空白を道にする
-    # dungeon = [[0 if x%3==1 and y%3==0 and mzfif(x,y,[0, 2]) and mzfif(x,y-1,[0,2]) else i for x, i in enumerate(j)]
-    #            for y, j in enumerate(dungeon)] #mazeの0地点同士が縦に並んでいる時、下の空白を道にする
-    # dungeon = [[0 if x%3==1 and y%3==0 and (mzf(x,y)==0 or mzf(x,y)==2) and (mzf(x,y-1)==0 or mzf(x,y-1)==2) else i for x, i in enumerate(j)]
-    #            for y, j in enumerate(dungeon)] #mazeの0地点同士が縦に並んでいる時、下の空白を道にする
-    dungeon = [[0 if x%3==1 and y%3==2 and (mzf(x,y)==0 or mzf(x,y)==2) and (mzf(x,y+1)==0 or mzf(x,y+1)==2) else i for x, i in enumerate(j)]
-               for y, j in enumerate(dungeon)] #mazeの0地点同士が縦に並んでいる時、上の空白を道にする
-    dungeon = [[0 if x%3==0 and y%3==1 and (mzf(x,y)==0 or mzf(x,y)==2) and (mzf(x-1,y)==0 or mzf(x-1,y)==2) else i for x, i in enumerate(j)]
-               for y, j in enumerate(dungeon)] #mazeの0地点同士が横に並んでいる時、右の空白を道にする
-    dungeon = [[0 if x%3==2 and y%3==1 and (mzf(x,y)==0 or mzf(x,y)==2) and (mzf(x+1,y)==0 or mzf(x+1,y)==2) else i for x, i in enumerate(j)]
-               for y, j in enumerate(dungeon)] #mazeの0地点同士が横に並んでいる時、左の空白を道にする
+    # dungeon = [[0 if x%3==1 and y%3==2 and (mzf(x,y)==0 or mzf(x,y)==2) and (mzf(x,y+1)==0 or mzf(x,y+1)==2) else i for x, i in enumerate(j)]
+    #            for y, j in enumerate(dungeon)] #mazeの0地点同士が縦に並んでいる時、上の空白を道にする
+    # dungeon = [[0 if x%3==0 and y%3==1 and (mzf(x,y)==0 or mzf(x,y)==2) and (mzf(x-1,y)==0 or mzf(x-1,y)==2) else i for x, i in enumerate(j)]
+    #            for y, j in enumerate(dungeon)] #mazeの0地点同士が横に並んでいる時、右の空白を道にする
+    # dungeon = [[0 if x%3==2 and y%3==1 and (mzf(x,y)==0 or mzf(x,y)==2) and (mzf(x+1,y)==0 or mzf(x+1,y)==2) else i for x, i in enumerate(j)]
+    #            for y, j in enumerate(dungeon)] #mazeの0地点同士が横に並んでいる時、左の空白を道にする
     print("----dungeon----")
     for y in dungeon:
         print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx"), y, ""))
