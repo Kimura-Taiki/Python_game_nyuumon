@@ -113,9 +113,16 @@ def put_protag(dgn): # 主人公をダンジョン上の空白地にランダム
 
 def move_player(key): # 主人公の移動
     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
-
-    if dungeon[pl_y][pl_x] == 1: # 宝箱に載った
+    def on_event(bool, chip, i, func):
+        global dungeon, pl_x, pl_y, idx, tmr
+        if dungeon[pl_y][pl_x] != chip: return bool
         dungeon[pl_y][pl_x] = 0
+        func()
+        idx = i
+        tmr = 0
+        return True
+    def on_treasure():
+        global treasure, potion, blazegem, food
         treasure = random.choice([0,0,0,1,1,1,1,1,1,2])
         if treasure == 0:
             potion += 1
@@ -123,26 +130,47 @@ def move_player(key): # 主人公の移動
             blazegem += 1
         if treasure == 2:
             food = int(food/2)
-        idx = Idx.ON_ITEM
-        tmr = 0
-        return
-    if dungeon[pl_y][pl_x] == 2: # 繭に載った
-        dungeon[pl_y][pl_x] = 0
-        r = random.randint(0, 99)
-        if r < 40: # 食料
-            treasure = random.choice([3,3,3,4])
-            if treasure == 3: food += 20
-            if treasure == 4: food += 100
-            idx = Idx.ON_ITEM
-            tmr = 0
-        else: # 敵出現
-            idx = Idx.ON_ENEMY
-            tmr = 0
-            return
-    if dungeon[pl_y][pl_x] == 3: # 階段に載った
-        idx = Idx.ON_STAIRS
-        tmr = 0
-        return
+    def on_food():
+        global treasure, food
+        treasure = random.choice([3,3,3,4])
+        if treasure == 3: food += 20
+        if treasure == 4: food += 100
+    def shift_scene_only():
+        pass
+    pipeline_each(False, [partial(on_event, chip=1,                                         i=Idx.ON_ITEM,  func=on_treasure),
+                          partial(on_event, chip=(2 if random.randint(0, 99) < 40 else -1), i=Idx.ON_ITEM,  func=on_food),
+                          partial(on_event, chip=2,                                         i=Idx.ON_ENEMY, func=shift_scene_only),
+                          partial(on_event, chip=3,                                         i=Idx.ON_STAIRS,func=shift_scene_only)])
+
+    # if dungeon[pl_y][pl_x] == 1: # 宝箱に載った
+    #     dungeon[pl_y][pl_x] = 0
+    #     treasure = random.choice([0,0,0,1,1,1,1,1,1,2])
+    #     if treasure == 0:
+    #         potion += 1
+    #     if treasure == 1:
+    #         blazegem += 1
+    #     if treasure == 2:
+    #         food = int(food/2)
+    #     idx = Idx.ON_ITEM
+    #     tmr = 0
+    #     return
+    # if dungeon[pl_y][pl_x] == 2: # 繭に載った
+    #     dungeon[pl_y][pl_x] = 0
+    #     r = random.randint(0, 99)
+    #     if r < 40: # 食料
+    #         treasure = random.choice([3,3,3,4])
+    #         if treasure == 3: food += 20
+    #         if treasure == 4: food += 100
+    #         idx = Idx.ON_ITEM
+    #         tmr = 0
+    #     else: # 敵出現
+    #         idx = Idx.ON_ENEMY
+    #         tmr = 0
+    #         return
+    # if dungeon[pl_y][pl_x] == 3: # 階段に載った
+    #     idx = Idx.ON_STAIRS
+    #     tmr = 0
+    #     return
     
     # 方向キーで上下左右に移動
     def move(bool, k_code, dir, dx, dy):
