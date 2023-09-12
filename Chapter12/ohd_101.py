@@ -25,7 +25,7 @@ dungeon = [[0]*DUNGEON_W for i in range(DUNGEON_H)]
 def pipeline_each(data, fns):
     return reduce(lambda a, x: x(a), fns, data)
 
-def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
+def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動生成
     def set_wall(mz, x, y): #壁を作る
         mz[y][x] = 1
         return mz
@@ -39,7 +39,7 @@ def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
         r = random.randint(0, 3) if x==2 else random.randint(0, 2)# １列目は四方に、２列目以降は左以外に壁を作る
         mz[y+YP[r]][x+XP[r]] = 1
         return mz
-    maze = pipeline_each([[0]*maze_w for i in range(maze_h)], 
+    return pipeline_each([[0]*maze_w for i in range(maze_h)], 
                          [partial(set_wall, x=0, y=i) for i in range(maze_h)]+  #左外郭
                          [partial(set_wall, x=maze_w-1, y=i) for i in range(maze_h)]+ #右外郭
                          [partial(set_wall, x=i, y=0) for i in range(maze_w)]+ #上外郭
@@ -48,6 +48,8 @@ def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
                          [partial(set_pillar_wall, x=i, y=j) for j in range(2, maze_h-2, 2) for i in range(2, maze_w-2, 2)]+ #柱から上下左右の壁
                          [partial(set_random_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]) #部屋
 
+def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
+    maze = make_maze(maze_w, maze_w) # 元となる迷路を作る
     # 迷路からダンジョンを作る
     def dig_tunnel(dgn, x, y, dx, dy):
         if (maze[y][x] == 0 or maze[y][x] == 2) and (maze[y+dy][x+dx] == 0 or maze[y+dy][x+dx] == 2):
@@ -58,19 +60,13 @@ def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
         return dgn
     def dig_room(dgn, x, y):
         return pipeline_each(dgn, [partial(dig_dot, x=i, y=j) for j in range(y*3, y*3+3) for i in range(x*3, x*3+3)])
-    dungeon = pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], 
-                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=-1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-                            [partial(dig_tunnel, x=i, y=j, dx=-1, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-                            [partial(dig_tunnel, x=i, y=j, dx=1, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-                            [partial(dig_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1) if maze[j][i] == 2]
-                            )
-    print("----dungeon----")
-    for y in dungeon:
-        print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx"), y, ""))
-    # exit() # ダンジョンを構成したらさっさと終了
-    return dungeon
+    return pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], 
+                         [partial(dig_tunnel, x=i, y=j, dx=0, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                         [partial(dig_tunnel, x=i, y=j, dx=0, dy=-1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                         [partial(dig_tunnel, x=i, y=j, dx=0, dy=1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                         [partial(dig_tunnel, x=i, y=j, dx=-1, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                         [partial(dig_tunnel, x=i, y=j, dx=1, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                         [partial(dig_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1) if maze[j][i] == 2])
 
 def draw_dungeon(bg, fnt): # ダンジョンを描画する
     bg.fill(BLACK)
@@ -565,9 +561,6 @@ def main(): # メイン処理
     global key, tmr, speed
 
     clock = pygame.time.Clock()
-
-    # for i, scene in scenes.items():
-    #     print(i, scene)
 
     while True:
         for event in pygame.event.get():
