@@ -25,64 +25,38 @@ dungeon = [[0]*DUNGEON_W for i in range(DUNGEON_H)]
 def pipeline_each(data, fns):
     return reduce(lambda a, x: x(a), fns, data)
 
-def substitude(var, value):
-    var = value
-    print("substitude")
-    print(var)
-    print(value)
-    return False
-
 def make_dungeon(): # ダンジョンの自動生成
     global dungeon
 
     def set_wall(mz, x, y): #壁を作る
-        print("sewa")
         mz[y][x] = 1
         return mz
     def set_random_room(mz, x, y): #20%の確率で部屋を作る
-        if mz[y][x] == 0 and random.randint(0, 99) < 20:
-            mz[y][x] = 2
+        mz[y][x] = 2 if mz[y][x] == 0 and random.randint(0, 99) < 20 else mz[y][x]
         return mz
     XP = [ 0, 1, 0,-1]
     YP = [-1, 0, 1, 0]
-    def set_pillar_wall(mz, x, y, r): #柱の隣に壁を作る
+    def set_pillar_wall(mz, x, y): #柱の隣に壁を作る
+        r = random.randint(0, 3) if x==2 else random.randint(0, 2)# １列目は四方に、２列目以降は左以外に壁を作る
         mz[y+YP[r]][x+XP[r]] = 1
         return mz
-    wall_seed = [[x, y, random.randint(0, 3) if x==2 else random.randint(0, 2)] # １列目は四方に、２列目以降は左以外に壁を作る
-                 for y in range(2, MAZE_H-2, 2) for x in range(2, MAZE_W-2, 2)] # 壁を作るべきマスを抽出する
-    # maze = [[0]*MAZE_W for i in range(MAZE_H)]
-    # maze = pipeline_each(maze, [partial(set_wall, x=0, y=i) for i in range(MAZE_H)]) #左外郭
-    # maze = pipeline_each(maze, [partial(set_wall, x=MAZE_W-1, y=i) for i in range(MAZE_H)]) #右外郭
-    # maze = pipeline_each(maze, [partial(set_wall, x=i, y=0) for i in range(MAZE_W)]) #上外郭
-    # maze = pipeline_each(maze, [partial(set_wall, x=i, y=MAZE_H-1) for i in range(MAZE_W)]) #下外郭
-    # maze = pipeline_each(maze, [partial(set_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]) #柱
-    # maze = pipeline_each(maze, [partial(set_random_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1) if maze[j][i] == 0]) #部屋
-    # maze = pipeline_each(maze, [partial(set_pillar_wall, x=i[0], y=i[1], r=i[2]) for i in wall_seed])
-    
-    # maze = [[0]*MAZE_W for i in range(MAZE_H)]
     maze = pipeline_each([[0]*MAZE_W for i in range(MAZE_H)], 
                          [partial(set_wall, x=0, y=i) for i in range(MAZE_H)]+  #左外郭
                          [partial(set_wall, x=MAZE_W-1, y=i) for i in range(MAZE_H)]+ #右外郭
                          [partial(set_wall, x=i, y=0) for i in range(MAZE_W)]+ #上外郭
                          [partial(set_wall, x=i, y=MAZE_H-1) for i in range(MAZE_W)]+ #下外郭
                          [partial(set_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]+ #柱
-                         [partial(set_pillar_wall, x=i[0], y=i[1], r=i[2]) for i in wall_seed]+ #柱から上下左右の壁
+                         [partial(set_pillar_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]+ #柱から上下左右の壁
                          [partial(set_random_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]) #部屋
-    # maze = pipeline_each([[0]*MAZE_W for i in range(MAZE_H)], [
-    #     [partial(set_wall, x=0, y=i) for i in range(MAZE_H)]+  #左外郭
-    #     [partial(set_wall, x=MAZE_W-1, y=i) for i in range(MAZE_H)]+ #右外郭
-    #     [partial(set_wall, x=i, y=0) for i in range(MAZE_W)]+ #上外郭
-    #     [partial(set_wall, x=i, y=MAZE_H-1) for i in range(MAZE_W)]+ #下外郭
-    #     [partial(set_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]+ #柱
-    #     [partial(set_pillar_wall, x=i[0], y=i[1], r=i[2]) for i in wall_seed]+ #柱から上下左右の壁
-    #     [partial(set_random_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)] #部屋
-    #     ])
-    
+        
     # 迷路からダンジョンを作る
     mzf = lambda xx, yy :maze[int(yy/3)][int(xx/3)]
     mzfif = lambda xx, yy, arr :reduce(lambda acc, cur: acc or mzf(xx,yy)==cur, arr, False)
     is_road = lambda xx, yy, dx, dy, arr :xx%3==1+dx and yy%3==1+dy and mzfif(xx,yy,arr) and mzfif(xx+dx,yy+dy,arr)
     dig_dungeon = lambda dgn, dx, dy, arr: [[0 if is_road(x,y,dx,dy,arr) else i for x, i in enumerate(j)] for y, j in enumerate(dgn)]
+    # def dig_dungeon(dgn, dx, dy, arr):
+
+    #     return dgn
     make_room = lambda dgn: [[0 if mzf(x,y)==2 else i for x, i in enumerate(j)] for y, j in enumerate(dgn)]
     dungeon = pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], [partial(dig_dungeon,dx=0,dy=0,arr=[0]), 
                                                                         partial(dig_dungeon,dx=-1,dy=0,arr=[0,2]), 
