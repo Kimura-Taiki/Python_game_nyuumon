@@ -25,9 +25,7 @@ dungeon = [[0]*DUNGEON_W for i in range(DUNGEON_H)]
 def pipeline_each(data, fns):
     return reduce(lambda a, x: x(a), fns, data)
 
-def make_dungeon(): # ダンジョンの自動生成
-    global dungeon
-
+def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
     def set_wall(mz, x, y): #壁を作る
         mz[y][x] = 1
         return mz
@@ -41,25 +39,14 @@ def make_dungeon(): # ダンジョンの自動生成
         r = random.randint(0, 3) if x==2 else random.randint(0, 2)# １列目は四方に、２列目以降は左以外に壁を作る
         mz[y+YP[r]][x+XP[r]] = 1
         return mz
-    maze = pipeline_each([[0]*MAZE_W for i in range(MAZE_H)], 
-                         [partial(set_wall, x=0, y=i) for i in range(MAZE_H)]+  #左外郭
-                         [partial(set_wall, x=MAZE_W-1, y=i) for i in range(MAZE_H)]+ #右外郭
-                         [partial(set_wall, x=i, y=0) for i in range(MAZE_W)]+ #上外郭
-                         [partial(set_wall, x=i, y=MAZE_H-1) for i in range(MAZE_W)]+ #下外郭
-                         [partial(set_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]+ #柱
-                         [partial(set_pillar_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]+ #柱から上下左右の壁
-                         [partial(set_random_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]) #部屋
-    # # ダンジョン生成の為の固定maze
-    # maze = [[1,1,1,1,1,1,1,1,1,1,1],
-    #         [1,0,1,0,0,0,0,0,0,0,1],
-    #         [1,0,1,2,1,0,1,0,1,1,1],
-    #         [1,0,0,0,1,0,1,0,1,0,1],
-    #         [1,1,1,0,1,1,1,0,1,0,1],
-    #         [1,0,1,0,0,0,0,0,0,0,1],
-    #         [1,0,1,0,1,1,1,1,1,0,1],
-    #         [1,0,0,0,0,0,0,0,1,0,1],
-    #         [1,1,1,1,1,1,1,1,1,1,1]
-    #         ]
+    maze = pipeline_each([[0]*maze_w for i in range(maze_h)], 
+                         [partial(set_wall, x=0, y=i) for i in range(maze_h)]+  #左外郭
+                         [partial(set_wall, x=maze_w-1, y=i) for i in range(maze_h)]+ #右外郭
+                         [partial(set_wall, x=i, y=0) for i in range(maze_w)]+ #上外郭
+                         [partial(set_wall, x=i, y=maze_h-1) for i in range(maze_w)]+ #下外郭
+                         [partial(set_wall, x=i, y=j) for j in range(2, maze_h-2, 2) for i in range(2, maze_w-2, 2)]+ #柱
+                         [partial(set_pillar_wall, x=i, y=j) for j in range(2, maze_h-2, 2) for i in range(2, maze_w-2, 2)]+ #柱から上下左右の壁
+                         [partial(set_random_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]) #部屋
 
     # 迷路からダンジョンを作る
     def dig_tunnel(dgn, x, y, dx, dy):
@@ -72,17 +59,18 @@ def make_dungeon(): # ダンジョンの自動生成
     def dig_room(dgn, x, y):
         return pipeline_each(dgn, [partial(dig_dot, x=i, y=j) for j in range(y*3, y*3+3) for i in range(x*3, x*3+3)])
     dungeon = pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], 
-                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=0) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
-                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=-1) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
-                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=1) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
-                            [partial(dig_tunnel, x=i, y=j, dx=-1, dy=0) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
-                            [partial(dig_tunnel, x=i, y=j, dx=1, dy=0) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
-                            [partial(dig_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1) if maze[j][i] == 2]
+                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=-1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                            [partial(dig_tunnel, x=i, y=j, dx=-1, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                            [partial(dig_tunnel, x=i, y=j, dx=1, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
+                            [partial(dig_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1) if maze[j][i] == 2]
                             )
     print("----dungeon----")
     for y in dungeon:
         print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx"), y, ""))
-    exit() # ダンジョンを構成したらさっさと終了
+    # exit() # ダンジョンを構成したらさっさと終了
+    return dungeon
 
 def draw_dungeon(bg, fnt): # ダンジョンを描画する
     bg.fill(BLACK)
@@ -302,6 +290,7 @@ def scene_title(): # タイトル画面
     global screen, font, fontS, key
     global idx, tmr
     global floor, welcome, pl_lifemax, pl_life, pl_str, food, potion, blazegem
+    global dungeon
     if tmr == 1:
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_title.ogg")
         pygame.mixer.music.play(-1)
@@ -311,7 +300,7 @@ def scene_title(): # タイトル画面
         draw_text(screen, "You reached floor {}.".format(fl_max), 300, 460, font, CYAN)
     draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
     if key[K_SPACE] == 1:
-        make_dungeon()
+        dungeon = make_dungeon(MAZE_W, MAZE_H)
         put_event()
         floor = 1
         welcome = 15
@@ -347,7 +336,7 @@ def scene_on_stairs(): # 画面切り替え
         if floor > fl_max:
             fl_max = floor
         welcome = 15
-        make_dungeon()
+        dungeon = make_dungeon(MAZE_W, MAZE_H)
         put_event()
     if 6 <= tmr and tmr <= 9:
         h = 80*(10-tmr)
