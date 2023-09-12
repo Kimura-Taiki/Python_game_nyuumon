@@ -32,7 +32,8 @@ def make_dungeon(): # ダンジョンの自動生成
         mz[y][x] = 1
         return mz
     def set_random_room(mz, x, y): #20%の確率で部屋を作る
-        mz[y][x] = 2 if mz[y][x] == 0 and random.randint(0, 99) < 20 else mz[y][x]
+        if mz[y][x] == 0 and random.randint(0, 99) < 20:
+            mz[y][x] = 2
         return mz
     XP = [ 0, 1, 0,-1]
     YP = [-1, 0, 1, 0]
@@ -48,22 +49,36 @@ def make_dungeon(): # ダンジョンの自動生成
                          [partial(set_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]+ #柱
                          [partial(set_pillar_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]+ #柱から上下左右の壁
                          [partial(set_random_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]) #部屋
-        
-    # 迷路からダンジョンを作る
-    mzf = lambda xx, yy :maze[int(yy/3)][int(xx/3)]
-    mzfif = lambda xx, yy, arr :reduce(lambda acc, cur: acc or mzf(xx,yy)==cur, arr, False)
-    is_road = lambda xx, yy, dx, dy, arr :xx%3==1+dx and yy%3==1+dy and mzfif(xx,yy,arr) and mzfif(xx+dx,yy+dy,arr)
-    dig_dungeon = lambda dgn, dx, dy, arr: [[0 if is_road(x,y,dx,dy,arr) else i for x, i in enumerate(j)] for y, j in enumerate(dgn)]
-    # def dig_dungeon(dgn, dx, dy, arr):
+    # # ダンジョン生成の為の固定maze
+    # maze = [[1,1,1,1,1,1,1,1,1,1,1],
+    #         [1,0,1,0,0,0,0,0,0,0,1],
+    #         [1,0,1,2,1,0,1,0,1,1,1],
+    #         [1,0,0,0,1,0,1,0,1,0,1],
+    #         [1,1,1,0,1,1,1,0,1,0,1],
+    #         [1,0,1,0,0,0,0,0,0,0,1],
+    #         [1,0,1,0,1,1,1,1,1,0,1],
+    #         [1,0,0,0,0,0,0,0,1,0,1],
+    #         [1,1,1,1,1,1,1,1,1,1,1]
+    #         ]
 
-    #     return dgn
-    make_room = lambda dgn: [[0 if mzf(x,y)==2 else i for x, i in enumerate(j)] for y, j in enumerate(dgn)]
-    dungeon = pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], [partial(dig_dungeon,dx=0,dy=0,arr=[0]), 
-                                                                        partial(dig_dungeon,dx=-1,dy=0,arr=[0,2]), 
-                                                                        partial(dig_dungeon,dx=1,dy=0,arr=[0,2]), 
-                                                                        partial(dig_dungeon,dx=0,dy=-1,arr=[0,2]), 
-                                                                        partial(dig_dungeon,dx=0,dy=1,arr=[0,2]),
-                                                                        make_room])
+    # 迷路からダンジョンを作る
+    def dig_tunnel(dgn, x, y, dx, dy):
+        if (maze[y][x] == 0 or maze[y][x] == 2) and (maze[y+dy][x+dx] == 0 or maze[y+dy][x+dx] == 2):
+            dgn[y*3+1+dy][x*3+1+dx] = 0
+        return dgn
+    def dig_dot(dgn, x, y):
+        dgn[y][x] = 0
+        return dgn
+    def dig_room(dgn, x, y):
+        return pipeline_each(dgn, [partial(dig_dot, x=i, y=j) for j in range(y*3, y*3+3) for i in range(x*3, x*3+3)])
+    dungeon = pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], 
+                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=0) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
+                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=-1) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
+                            [partial(dig_tunnel, x=i, y=j, dx=0, dy=1) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
+                            [partial(dig_tunnel, x=i, y=j, dx=-1, dy=0) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
+                            [partial(dig_tunnel, x=i, y=j, dx=1, dy=0) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]+
+                            [partial(dig_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1) if maze[j][i] == 2]
+                            )
     print("----dungeon----")
     for y in dungeon:
         print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx"), y, ""))
