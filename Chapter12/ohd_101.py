@@ -145,8 +145,6 @@ def move_player(key): # 主人公の移動
         return
     
     # 方向キーで上下左右に移動
-    x = pl_x
-    y = pl_y
     def move(bool, k_code, dir, dx, dy):
         global pl_x, pl_y, pl_d
         if key[k_code] != 1: return bool or False
@@ -160,37 +158,22 @@ def move_player(key): # 主人公の移動
                              partial(move, k_code=K_DOWN, dir=1, dx= 0, dy= 1),
                              partial(move, k_code=K_LEFT, dir=2, dx=-1, dy= 0),
                              partial(move, k_code=K_RIGHT,dir=3, dx= 1, dy= 0)])
-    # if key[K_UP] == 1:
-    #     pl_d = 0
-    #     if dungeon[pl_y-1][pl_x] != 9:
-    #         pl_y -= 1
-    # if key[K_DOWN] == 1:
-    #     pl_d = 1
-    #     if dungeon[pl_y+1][pl_x] != 9:
-    #         pl_y += 1
-    # if key[K_LEFT] == 1:
-    #     pl_d = 2
-    #     if dungeon[pl_y][pl_x-1] != 9:
-    #         pl_x -= 1
-    # if key[K_RIGHT] == 1:
-    #     pl_d = 3
-    #     if dungeon[pl_y][pl_x+1] != 9:
-    #         pl_x += 1
     pl_a = pl_d*2
-    # if pl_x != x or pl_y != y: # 移動したら食料の量と体力を計算
     if is_move == True: # 移動したら食料の量と体力を計算
         pl_a += tmr%2 # 移動したら足踏みのアニメーション
-        if food > 0:
-            food -= 1
-            if pl_life < pl_lifemax:
-                pl_life += 1
-        else:
-            pl_life -= 5
-            if pl_life <= 0:
-                pl_life = 0
-                pygame.mixer.music.stop()
-                idx = Idx.GAME_OVER
-                tmr = 0
+        food, pl_life = eat_food(food, pl_life, pl_lifemax)
+        if pl_life <= 0:
+            pygame.mixer.music.stop()
+            idx = Idx.GAME_OVER
+            tmr = 0
+
+def eat_food(food, pl_life, pl_lifemax):
+    if food > 0:
+        food -= 1
+        pl_life = pl_life+1 if pl_life<pl_lifemax else pl_lifemax
+    else:
+        pl_life = pl_life-5 if pl_life>5 else 0
+    return food, pl_life
 
 # def move_player(key): # 主人公の移動
 #     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
