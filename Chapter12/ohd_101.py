@@ -34,42 +34,49 @@ def substitude(var, value):
 
 def make_dungeon(): # ダンジョンの自動生成
     global dungeon
-    XP = [ 0, 1, 0,-1]
-    YP = [-1, 0, 1, 0]
-    
-    rorr = lambda :[2] if random.randint(0,99)<20 else [0]
-    
-    maze = [[0]*MAZE_W for i in range(MAZE_H)]
-    def set_wall(mz, x, y):
+
+    def set_wall(mz, x, y): #壁を作る
+        print("sewa")
         mz[y][x] = 1
         return mz
-    def set_random_room(mz, x, y):
-        if random.randint(0, 99) < 20:
+    def set_random_room(mz, x, y): #20%の確率で部屋を作る
+        if mz[y][x] == 0 and random.randint(0, 99) < 20:
             mz[y][x] = 2
-        # mz[y][x] = 2
         return mz
-    maze = pipeline_each(maze, [partial(set_wall, x=0, y=i) for i in range(MAZE_H)])
-    maze = pipeline_each(maze, [partial(set_wall, x=MAZE_W-1, y=i) for i in range(MAZE_H)])
-    maze = pipeline_each(maze, [partial(set_wall, x=i, y=0) for i in range(MAZE_W)])
-    maze = pipeline_each(maze, [partial(set_wall, x=i, y=MAZE_H-1) for i in range(MAZE_W)])
-    maze = pipeline_each(maze, [partial(set_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)])
-    maze = pipeline_each(maze, [partial(set_random_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1) if maze[j][i] == 0])
-    # #外枠が1で中が0のmazeを作成
-    # maze = [[1]*MAZE_W #上下の行は全て1
-    #         if y==0 or y==MAZE_H-1
-    #         else (
-    #             reduce(lambda acc, cur: acc+rorr()+[0], range(int(MAZE_W/2-1)), [1])+rorr()+[1] #中間行の内、奇数行は左右端が1でそれ以外が2と0が交互
-    #             if y%2 == 1
-    #             else [1]+([0]+[1])*int(MAZE_W/2) #中間行の内、偶数業は1マス毎に柱を入れる
-    #             )
-    #         for y in range(MAZE_H)]
-    # #柱から上下左右に壁を作る
-    def set_pillar_wall(mz, x, y, r):
+    XP = [ 0, 1, 0,-1]
+    YP = [-1, 0, 1, 0]
+    def set_pillar_wall(mz, x, y, r): #柱の隣に壁を作る
         mz[y+YP[r]][x+XP[r]] = 1
         return mz
     wall_seed = [[x, y, random.randint(0, 3) if x==2 else random.randint(0, 2)] # １列目は四方に、２列目以降は左以外に壁を作る
                  for y in range(2, MAZE_H-2, 2) for x in range(2, MAZE_W-2, 2)] # 壁を作るべきマスを抽出する
-    maze = pipeline_each(maze, [partial(set_pillar_wall, x=i[0], y=i[1], r=i[2]) for i in wall_seed])
+    # maze = [[0]*MAZE_W for i in range(MAZE_H)]
+    # maze = pipeline_each(maze, [partial(set_wall, x=0, y=i) for i in range(MAZE_H)]) #左外郭
+    # maze = pipeline_each(maze, [partial(set_wall, x=MAZE_W-1, y=i) for i in range(MAZE_H)]) #右外郭
+    # maze = pipeline_each(maze, [partial(set_wall, x=i, y=0) for i in range(MAZE_W)]) #上外郭
+    # maze = pipeline_each(maze, [partial(set_wall, x=i, y=MAZE_H-1) for i in range(MAZE_W)]) #下外郭
+    # maze = pipeline_each(maze, [partial(set_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]) #柱
+    # maze = pipeline_each(maze, [partial(set_random_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1) if maze[j][i] == 0]) #部屋
+    # maze = pipeline_each(maze, [partial(set_pillar_wall, x=i[0], y=i[1], r=i[2]) for i in wall_seed])
+    
+    # maze = [[0]*MAZE_W for i in range(MAZE_H)]
+    maze = pipeline_each([[0]*MAZE_W for i in range(MAZE_H)], 
+                         [partial(set_wall, x=0, y=i) for i in range(MAZE_H)]+  #左外郭
+                         [partial(set_wall, x=MAZE_W-1, y=i) for i in range(MAZE_H)]+ #右外郭
+                         [partial(set_wall, x=i, y=0) for i in range(MAZE_W)]+ #上外郭
+                         [partial(set_wall, x=i, y=MAZE_H-1) for i in range(MAZE_W)]+ #下外郭
+                         [partial(set_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]+ #柱
+                         [partial(set_pillar_wall, x=i[0], y=i[1], r=i[2]) for i in wall_seed]+ #柱から上下左右の壁
+                         [partial(set_random_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)]) #部屋
+    # maze = pipeline_each([[0]*MAZE_W for i in range(MAZE_H)], [
+    #     [partial(set_wall, x=0, y=i) for i in range(MAZE_H)]+  #左外郭
+    #     [partial(set_wall, x=MAZE_W-1, y=i) for i in range(MAZE_H)]+ #右外郭
+    #     [partial(set_wall, x=i, y=0) for i in range(MAZE_W)]+ #上外郭
+    #     [partial(set_wall, x=i, y=MAZE_H-1) for i in range(MAZE_W)]+ #下外郭
+    #     [partial(set_wall, x=i, y=j) for j in range(2, MAZE_H-2, 2) for i in range(2, MAZE_W-2, 2)]+ #柱
+    #     [partial(set_pillar_wall, x=i[0], y=i[1], r=i[2]) for i in wall_seed]+ #柱から上下左右の壁
+    #     [partial(set_random_room, x=i, y=j) for j in range(1, MAZE_H-1) for i in range(1, MAZE_W-1)] #部屋
+    #     ])
     
     # 迷路からダンジョンを作る
     mzf = lambda xx, yy :maze[int(yy/3)][int(xx/3)]
