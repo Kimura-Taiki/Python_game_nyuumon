@@ -49,7 +49,9 @@ def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動�
                          [partial(set_random_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]) #部屋
 
 def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
-    maze = make_maze(maze_w, maze_w) # 元となる迷路を作る
+    maze = make_maze(maze_w, maze_h) # 元となる迷路を作る
+    print("----maze----")
+    [print(y) for y in maze]
     # 迷路からダンジョンを作る
     def dig_tunnel(dgn, x, y, dx, dy):
         if (maze[y][x] == 0 or maze[y][x] == 2) and (maze[y+dy][x+dx] == 0 or maze[y+dy][x+dx] == 2):
@@ -105,34 +107,21 @@ def put_event(): # 床にイベントを配置する
                              [partial(set_dot, x=i, y=j, n=0) for j in range(y-1, y+2) for i in range(x-1, x+2)]+
                              [partial(set_dot, x=x, y=y, n=n)])
     dungeon = pipeline_each(dungeon,
-                            [partial(dig_3x3, x=x, y=y, n=3) for x, y in [space()]])
-    # exit()
-    # dungeon = dig_3x3(dungeon, x, y)
-    
-    # # 階段の配置
-    # while True:
-    #     x = random.randint(3, DUNGEON_W-4)
-    #     y = random.randint(3, DUNGEON_H-4)
-    #     if(dungeon[y][x] == 0):
-    #         for ry in range(-1, 2): # 階段の周囲を床にする
-    #             for rx in range(-1, 2):
-    #                 dungeon[y+ry][x+rx] = 0
-    #         dungeon[y][x] = 3
-    #         break
-    # # 宝箱と繭の配置
-    # for i in range(60):
-    #     x = random.randint(3, DUNGEON_W-4)
-    #     y = random.randint(3, DUNGEON_H-4)
-    #     if(dungeon[y][x] == 0):
-    #         dungeon[y][x] = random.choice([1,2,2,2,2])
-    # プレイヤーの初期位置
-    while True:
-        pl_x = random.randint(3, DUNGEON_W-4)
-        pl_y = random.randint(3, DUNGEON_H-4)
-        if(dungeon[pl_y][pl_x]) == 0:
-            break
+                            [partial(dig_3x3, x=x, y=y, n=3) for x, y in [space()]]+ # 階段の配置
+                            [partial(set_dot, x=x, y=y, n=random.choice([1,2,2,2,2])) for x, y in [list(space()) for i in range(15)]]) # 宝箱と繭の配置
+    pl_x, pl_y = space()
+#    # プレイヤーの初期位置
+#     while True:
+#         pl_x = random.randint(3, DUNGEON_W-4)
+#         pl_y = random.randint(3, DUNGEON_H-4)
+#         if(dungeon[pl_y][pl_x]) == 0:
+#             break
     pl_d = 1
     pl_a = 2
+    print("----dungeon----")
+    for y in dungeon:
+        print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx" if cur==9 else "()"), y, ""))
+
 
 # def put_event(): # 床にイベントを配置する
 #     global pl_x, pl_y, pl_d, pl_a
