@@ -16,11 +16,9 @@ EMY_NAME = [
 
 MAZE_W = 11
 MAZE_H = 9
-# maze = [[0]*MAZE_W for i in range(MAZE_H)]
 
 DUNGEON_W = MAZE_W*3
 DUNGEON_H = MAZE_H*3
-# dungeon = [[0]*DUNGEON_W for i in range(DUNGEON_H)]
 
 def pipeline_each(data, fns):
     return reduce(lambda a, x: x(a), fns, data)
@@ -50,8 +48,6 @@ def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動�
 
 def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
     maze = make_maze(maze_w, maze_h) # 元となる迷路を作る
-    print("----maze----")
-    [print(y) for y in maze]
     # 迷路からダンジョンを作る
     def dig_tunnel(dgn, x, y, dx, dy):
         if (maze[y][x] == 0 or maze[y][x] == 2) and (maze[y+dy][x+dx] == 0 or maze[y+dy][x+dx] == 2):
@@ -90,15 +86,14 @@ def draw_dungeon(bg, fnt): # ダンジョンを描画する
     bg.blit(imgDark, [0, 0]) # 四隅が暗闇の画像を重ねる
     draw_para(bg, fnt) # 主人公の能力を表示
 
-def put_event(): # 床にイベントを配置する
-    global pl_x, pl_y, pl_d, pl_a
-    global dungeon
-    def space():
-        while True:
-            x = random.randint(3, DUNGEON_W-4)
-            y = random.randint(3, DUNGEON_H-4)
-            if dungeon[y][x] == 0:
-                return x, y
+def space(dgn): # (x, y)のタプル型としてダンジョン上の空白地を返す
+    while True:
+        x = random.randint(3, DUNGEON_W-4)
+        y = random.randint(3, DUNGEON_H-4)
+        if dgn[y][x] == 0:
+            return x, y
+
+def put_event(dungeon): # 床にイベントを配置する
     def set_dot(dgn, x, y, n):
         dgn[y][x] = n
         return dgn
@@ -106,49 +101,15 @@ def put_event(): # 床にイベントを配置する
         return pipeline_each(dgn, 
                              [partial(set_dot, x=i, y=j, n=0) for j in range(y-1, y+2) for i in range(x-1, x+2)]+
                              [partial(set_dot, x=x, y=y, n=n)])
-    dungeon = pipeline_each(dungeon,
-                            [partial(dig_3x3, x=x, y=y, n=3) for x, y in [space()]]+ # 階段の配置
-                            [partial(set_dot, x=x, y=y, n=random.choice([1,2,2,2,2])) for x, y in [list(space()) for i in range(15)]]) # 宝箱と繭の配置
-    pl_x, pl_y = space()
-#    # プレイヤーの初期位置
-#     while True:
-#         pl_x = random.randint(3, DUNGEON_W-4)
-#         pl_y = random.randint(3, DUNGEON_H-4)
-#         if(dungeon[pl_y][pl_x]) == 0:
-#             break
+    return pipeline_each(dungeon,
+                            [partial(dig_3x3, x=x, y=y, n=3) for x, y in [space(dungeon)]]+ # 階段の配置
+                            [partial(set_dot, x=x, y=y, n=random.choice([1,2,2,2,2])) for x, y in [list(space(dungeon)) for i in range(15)]]) # 宝箱と繭の配置
+
+def put_protag(dgn): # 主人公をダンジョン上の空白地にランダムに投下
+    global pl_x, pl_y, pl_d, pl_a
+    pl_x, pl_y = space(dgn)
     pl_d = 1
     pl_a = 2
-    print("----dungeon----")
-    for y in dungeon:
-        print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx" if cur==9 else "()"), y, ""))
-
-
-# def put_event(): # 床にイベントを配置する
-#     global pl_x, pl_y, pl_d, pl_a
-#     # 階段の配置
-#     while True:
-#         x = random.randint(3, DUNGEON_W-4)
-#         y = random.randint(3, DUNGEON_H-4)
-#         if(dungeon[y][x] == 0):
-#             for ry in range(-1, 2): # 階段の周囲を床にする
-#                 for rx in range(-1, 2):
-#                     dungeon[y+ry][x+rx] = 0
-#             dungeon[y][x] = 3
-#             break
-#     # 宝箱と繭の配置
-#     for i in range(60):
-#         x = random.randint(3, DUNGEON_W-4)
-#         y = random.randint(3, DUNGEON_H-4)
-#         if(dungeon[y][x] == 0):
-#             dungeon[y][x] = random.choice([1,2,2,2,2])
-#     # プレイヤーの初期位置
-#     while True:
-#         pl_x = random.randint(3, DUNGEON_W-4)
-#         pl_y = random.randint(3, DUNGEON_H-4)
-#         if(dungeon[pl_y][pl_x]) == 0:
-#             break
-#     pl_d = 1
-#     pl_a = 2
 
 def move_player(key): # 主人公の移動
     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
@@ -331,8 +292,8 @@ def scene_title(): # タイトル画面
         draw_text(screen, "You reached floor {}.".format(fl_max), 300, 460, font, CYAN)
     draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
     if key[K_SPACE] == 1:
-        dungeon = make_dungeon(MAZE_W, MAZE_H)
-        put_event()
+        dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
+        put_protag(dungeon)
         floor = 1
         welcome = 15
         pl_lifemax = 300
@@ -368,8 +329,8 @@ def scene_on_stairs(): # 画面切り替え
         if floor > fl_max:
             fl_max = floor
         welcome = 15
-        dungeon = make_dungeon(MAZE_W, MAZE_H)
-        put_event()
+        dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
+        put_protag(dungeon)
     if 6 <= tmr and tmr <= 9:
         h = 80*(10-tmr)
         pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
