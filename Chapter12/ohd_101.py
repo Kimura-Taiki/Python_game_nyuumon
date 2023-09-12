@@ -1,5 +1,4 @@
-from functools import reduce
-import functools
+from functools import reduce, partial
 import pygame
 import sys
 import random
@@ -26,6 +25,10 @@ dungeon = [[0]*DUNGEON_W for i in range(DUNGEON_H)]
 def pipeline_each(data, fns):
     return reduce(lambda a, x: x(a), fns, data)
 
+def substitude(var, value):
+    var = value
+    return False
+
 def make_dungeon(): # ダンジョンの自動生成
     global dungeon
     XP = [ 0, 1, 0,-1]
@@ -49,6 +52,14 @@ def make_dungeon(): # ダンジョンの自動生成
             if x > 2: # ２列目からは左に壁を作らない
                 d = random.randint(0, 2)
             maze[y+YP[d]][x+XP[d]] = 1
+    wall_seed = [[x, y, random.randint(0, 3) if x==2 else random.randint(0, 2)] for y in range(2, MAZE_H-2, 2) for x in range(2, MAZE_W-2, 2)]
+    [substitude(maze[i[1]+YP[i[2]]][i[0]+XP[i[2]]], 1) for i in wall_seed]
+    # wall_seed = [str(x)+":"+str(y)+":"+str(random.randint(0, 3) if x==2 else random.randint(0, 2)) for y in range(2, MAZE_H-2, 2) for x in range(2, MAZE_W-2, 2)]
+    # [print(str(x)+":"+str(y)+":"+str(random.randint(0, 3) if x==2 else random.randint(0, 2))) for y in range(2, MAZE_H-2, 2) for x in range(2, MAZE_W-2, 2)]
+    # print("----wall_seed----")
+    # print(wall_seed)
+    # exit()
+    # wall_seed = [[0 for i in range(int(MAZE_W/2-1))] for j in range(int(MAZE_H/2-1))]
     
     # 迷路からダンジョンを作る
     mzf = lambda xx, yy :maze[int(yy/3)][int(xx/3)]
@@ -56,14 +67,12 @@ def make_dungeon(): # ダンジョンの自動生成
     is_road = lambda xx, yy, dx, dy, arr :xx%3==1+dx and yy%3==1+dy and mzfif(xx,yy,arr) and mzfif(xx+dx,yy+dy,arr)
     dig_dungeon = lambda dgn, dx, dy, arr: [[0 if is_road(x,y,dx,dy,arr) else i for x, i in enumerate(j)] for y, j in enumerate(dgn)]
     make_room = lambda dgn: [[0 if mzf(x,y)==2 else i for x, i in enumerate(j)] for y, j in enumerate(dgn)]
-    dungeon = pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], [functools.partial(dig_dungeon,dx=0,dy=0,arr=[0]), 
-                                                                        functools.partial(dig_dungeon,dx=-1,dy=0,arr=[0,2]), 
-                                                                        functools.partial(dig_dungeon,dx=1,dy=0,arr=[0,2]), 
-                                                                        functools.partial(dig_dungeon,dx=0,dy=-1,arr=[0,2]), 
-                                                                        functools.partial(dig_dungeon,dx=0,dy=1,arr=[0,2]),
+    dungeon = pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], [partial(dig_dungeon,dx=0,dy=0,arr=[0]), 
+                                                                        partial(dig_dungeon,dx=-1,dy=0,arr=[0,2]), 
+                                                                        partial(dig_dungeon,dx=1,dy=0,arr=[0,2]), 
+                                                                        partial(dig_dungeon,dx=0,dy=-1,arr=[0,2]), 
+                                                                        partial(dig_dungeon,dx=0,dy=1,arr=[0,2]),
                                                                         make_room])
-    # dungeon = [[0 if mzf(x,y)==2 else i for x, i in enumerate(j)]
-    #            for y, j in enumerate(dungeon)] #一部0地点を部屋に拡張
     print("----dungeon----")
     for y in dungeon:
         print(reduce(lambda acc, cur: acc+("  " if cur==0 else "xx"), y, ""))
