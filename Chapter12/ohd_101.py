@@ -110,9 +110,11 @@ def put_protag(dgn): # 主人公をダンジョン上の空白地にランダム
     pl_x, pl_y = space(dgn)
     pl_d = 1
     pl_a = 2
-    # 以下は階段処理を見る為の追記
+    # 以下はアイテム処理を見る為の追記
     global dungeon
-    dungeon[pl_y][pl_x-1] = 3
+    dungeon[pl_y-1][pl_x] = 3
+    dungeon[pl_y][pl_x-1] = 1
+    dungeon[pl_y][pl_x+1] = 1
 
 def move_player(key): # 主人公の移動
     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
@@ -336,17 +338,17 @@ def scene_on_stairs(): # 画面切り替え
         h = 80*(10-tmr)
         pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
         pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
-    def scene_change():
-        global idx, tmr, resolved_stairs_steps
-        idx = Idx.FIELD_WFI
-        tmr = 0
-        resolved_stairs_steps = 0
     draw_dungeon(screen, fontS)
     steps = [[close_curtain, 5],
              [make_new_dungeon, 0],
              [open_curtain, 5],
-             [scene_change, 0]]
+             [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
     resolved_stairs_steps = step_by_step(steps, resolved_stairs_steps, speed)
+
+def scene_change(enum):
+    global idx, tmr
+    idx = enum
+    tmr = 0
 
 def step_by_step(steps, resolved, spd=1):
     now = tmr*spd
@@ -357,10 +359,15 @@ def step_by_step(steps, resolved, spd=1):
             step[0]()
             return ((resolved+1)%len(steps)) if i >= resolved else resolved
 
-def kugiri():
-    pass
-# def scene_on_stairs(): # 画面切り替え
-
+# get_item_steps = 0
+# def scene_on_item(): # アイテム入手もしくはトラップ
+#     global idx, get_item_steps
+#     def draw_get_item():
+#         draw_dungeon(screen, fontS)
+#         screen.blit(imgItem[treasure], [320, 220])
+#         draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
+#     def 
+#         idx = Idx.FIELD_WFI
 
 def scene_on_item(): # アイテム入手もしくはトラップ
     global idx
@@ -369,6 +376,9 @@ def scene_on_item(): # アイテム入手もしくはトラップ
     draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
     if tmr == 10:
         idx = Idx.FIELD_WFI
+
+def pass_func(ret=False):
+    return ret
 
 def scene_game_over(): # ゲームオーバー
     global idx, tmr, pl_a
