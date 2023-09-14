@@ -232,12 +232,13 @@ def draw_battle(bg, fnt): # 戦闘画面の描画
         draw_text(bg, message[i], 600, 100+i*50, fnt, WHITE)
     draw_para(bg, fnt) # 主人公の能力を表示
 
+once_juuji = True
 def battle_command(bg, fnt, key): # コマンドの入力と表示
-    global btl_cmd
+    global btl_cmd, once_juuji
     def assign_cmd(b_e, k_code, cmd):
         return (cmd, True) if key[k_code] else b_e
-    def shift_cmd(b_e, k_code, shift, mod):
-        return ((b_e[0]+shift+mod)%mod, False) if key[k_code] else b_e
+    def shift_cmd(b_e, k_code, shift, mod, oj):
+        return ((b_e[0]+shift+mod)%mod, False) if key[k_code] and oj else b_e
     def decide_cmd(b_e, k_code):
         return (b_e[0], True) if key[k_code] else b_e
     btl_cmd, ent = pipeline_each((btl_cmd, False), [
@@ -245,11 +246,12 @@ def battle_command(bg, fnt, key): # コマンドの入力と表示
         partial(assign_cmd, k_code=K_p, cmd=1), # Pキー
         partial(assign_cmd, k_code=K_b, cmd=2), # Bキー
         partial(assign_cmd, k_code=K_r, cmd=3), # Rキー
-        partial(shift_cmd, k_code=K_UP, shift=-1, mod=4), # ↑キー
-        partial(shift_cmd, k_code=K_DOWN, shift=1, mod=4), # ↓キー
+        partial(shift_cmd, k_code=K_UP, shift=-1, mod=4, oj=once_juuji), # ↑キー
+        partial(shift_cmd, k_code=K_DOWN, shift=1, mod=4, oj=once_juuji), # ↓キー
         partial(decide_cmd, k_code=K_SPACE), # 空白キー
         partial(decide_cmd, k_code=K_RETURN) # 改行キー
         ])
+    once_juuji = not (key[K_UP] or key[K_DOWN])
     for i in range(4):
         c = WHITE
         if btl_cmd == i: c = BLINK[tmr%6]
