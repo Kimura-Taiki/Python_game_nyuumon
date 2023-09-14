@@ -112,12 +112,11 @@ def put_protag(dgn): # 主人公をダンジョン上の空白地にランダム
     pl_a = 2
     # 以下はアイテム処理を見る為の追記
     global dungeon
-    dungeon[pl_y-1][pl_x] = 3
+    dungeon[pl_y-3][pl_x] = 2
+    dungeon[pl_y-2][pl_x] = 2
+    dungeon[pl_y-1][pl_x] = 2
     dungeon[pl_y][pl_x-1] = 1
     dungeon[pl_y][pl_x+1] = 1
-    # 以下はフィールド上ゲームオーバーを見る為の追記
-    global pl_life
-    pl_life -= 300
 
 def move_player(key): # 主人公の移動
     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
@@ -379,25 +378,19 @@ def pass_method():
 scene_steps = 0
 def scene_game_over(): # ゲームオーバー
     global idx, tmr, pl_a, scene_steps
-    # if tmr <= 30:
     def staggered():
         global pl_a
         PL_TURN = [2, 4, 0, 6]
         pl_a = PL_TURN[tmr%4]
-        # if tmr == 30: pl_a = 8 # 倒れた絵
         draw_dungeon(screen, fontS)
     def fallen():
         global pl_a
         pl_a = 8
         draw_dungeon(screen, fontS)
-    # elif tmr == 31:
     def you_died():
         se[3].play()
         draw_text(screen, "You died.", 360, 240, font, RED)
         draw_text(screen, "Game over.", 360, 380, font, RED)
-    # elif tmr == 100:
-    #     idx = Idx.TITLE
-    #     tmr = 0
     steps = [[staggered, 28],
              [fallen, 0],
              [you_died, 0],
@@ -405,39 +398,33 @@ def scene_game_over(): # ゲームオーバー
              [partial(scene_change, enum=Idx.TITLE), 0]]
     scene_steps = step_by_step(steps, scene_steps, speed)
 
-# def scene_game_over(): # ゲームオーバー
-#     global idx, tmr, pl_a
-#     if tmr <= 30:
-#         PL_TURN = [2, 4, 0, 6]
-#         pl_a = PL_TURN[tmr%4]
-#         if tmr == 30: pl_a = 8 # 倒れた絵
-#         draw_dungeon(screen, fontS)
-#     elif tmr == 31:
-#         se[3].play()
-#         draw_text(screen, "You died.", 360, 240, font, RED)
-#         draw_text(screen, "Game over.", 360, 380, font, RED)
-#     elif tmr == 100:
-#         idx = Idx.TITLE
-#         tmr = 0
-
 def scene_on_enemy(): # 戦闘準備
-    global idx, tmr
-    if tmr == 1:
+    # global idx, tmr
+    global scene_steps
+    # if tmr == 1:
+    def battle_start():
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_battle.ogg")
         pygame.mixer.music.play(-1)
         init_battle()
         init_message()
-    elif tmr <= 4:
+    # elif tmr <= 4:
+    def encounter():
         bx = (4-tmr)*220
         by = 0
         screen.blit(imgBtlBG, [bx, by])
         draw_text(screen, "Encounter!", 350, 200, font, WHITE)
-    elif tmr <= 16:
+    # elif tmr <= 16:
+    def enemy_appear():
         draw_battle(screen, fontS)
         draw_text(screen, emy_name+" appear!", 300, 200, font, WHITE)
-    else:
-        idx = Idx.BATTLE_WFI
-        tmr = 0
+    # else:
+        # idx = Idx.BATTLE_WFI
+        # tmr = 0
+    steps = [[battle_start, 0],
+             [encounter, 4],
+             [enemy_appear, 12],
+             [partial(scene_change, enum=Idx.BATTLE_WFI), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
     global idx, tmr
