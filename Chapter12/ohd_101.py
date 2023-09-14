@@ -115,6 +115,9 @@ def put_protag(dgn): # 主人公をダンジョン上の空白地にランダム
     dungeon[pl_y-1][pl_x] = 3
     dungeon[pl_y][pl_x-1] = 1
     dungeon[pl_y][pl_x+1] = 1
+    # 以下はフィールド上ゲームオーバーを見る為の追記
+    global pl_life
+    pl_life -= 300
 
 def move_player(key): # 主人公の移動
     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
@@ -370,31 +373,52 @@ def scene_on_item(): # アイテム入手もしくはトラップ
              [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
     get_item_steps = step_by_step(steps, get_item_steps, speed)
 
-# def scene_on_item(): # アイテム入手もしくはトラップ
-#     global idx
-#     draw_dungeon(screen, fontS)
-#     screen.blit(imgItem[treasure], [320, 220])
-#     draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
-#     if tmr == 10:
-#         idx = Idx.FIELD_WFI
+def pass_method():
+    return
 
-def pass_func(ret=False):
-    return ret
-
+scene_steps = 0
 def scene_game_over(): # ゲームオーバー
-    global idx, tmr, pl_a
-    if tmr <= 30:
+    global idx, tmr, pl_a, scene_steps
+    # if tmr <= 30:
+    def staggered():
+        global pl_a
         PL_TURN = [2, 4, 0, 6]
         pl_a = PL_TURN[tmr%4]
-        if tmr == 30: pl_a = 8 # 倒れた絵
+        # if tmr == 30: pl_a = 8 # 倒れた絵
         draw_dungeon(screen, fontS)
-    elif tmr == 31:
+    def fallen():
+        global pl_a
+        pl_a = 8
+        draw_dungeon(screen, fontS)
+    # elif tmr == 31:
+    def you_died():
         se[3].play()
         draw_text(screen, "You died.", 360, 240, font, RED)
         draw_text(screen, "Game over.", 360, 380, font, RED)
-    elif tmr == 100:
-        idx = Idx.TITLE
-        tmr = 0
+    # elif tmr == 100:
+    #     idx = Idx.TITLE
+    #     tmr = 0
+    steps = [[staggered, 28],
+             [fallen, 0],
+             [you_died, 0],
+             [pass_method, 70],
+             [partial(scene_change, enum=Idx.TITLE), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
+
+# def scene_game_over(): # ゲームオーバー
+#     global idx, tmr, pl_a
+#     if tmr <= 30:
+#         PL_TURN = [2, 4, 0, 6]
+#         pl_a = PL_TURN[tmr%4]
+#         if tmr == 30: pl_a = 8 # 倒れた絵
+#         draw_dungeon(screen, fontS)
+#     elif tmr == 31:
+#         se[3].play()
+#         draw_text(screen, "You died.", 360, 240, font, RED)
+#         draw_text(screen, "Game over.", 360, 380, font, RED)
+#     elif tmr == 100:
+#         idx = Idx.TITLE
+#         tmr = 0
 
 def scene_on_enemy(): # 戦闘準備
     global idx, tmr
