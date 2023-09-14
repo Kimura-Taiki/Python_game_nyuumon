@@ -316,17 +316,15 @@ def scene_field_wfi(): # プレイヤーの移動
 
 resolved_stairs_steps = 0
 def scene_on_stairs(): # 画面切り替え
-    global screen, fontS, tmr, resolved_stairs_steps
+    global screen, fontS, tmr, resolved_stairs_steps, speed
     def close_curtain():
         global tmr, screen
-        print("{} : {}だよ".format(tmr, "close_curtain"))
         h = 80*tmr
         pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
         pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
     def make_new_dungeon():
         global floor, fl_max, welcome, dungeon
         pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
-        print("{} : {}だよ".format(tmr, "make_new_dungeon"))
         floor += 1
         if floor > fl_max:
             fl_max = floor
@@ -335,13 +333,11 @@ def scene_on_stairs(): # 画面切り替え
         put_protag(dungeon)
     def open_curtain():
         global tmr, screen
-        print("{} : {}だよ".format(tmr, "open_curtain"))
         h = 80*(10-tmr)
         pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
         pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
     def scene_change():
         global idx, tmr, resolved_stairs_steps
-        print("{} : {}だよ".format(tmr, "scene_change"))
         idx = Idx.FIELD_WFI
         tmr = 0
         resolved_stairs_steps = 0
@@ -350,7 +346,7 @@ def scene_on_stairs(): # 画面切り替え
              [make_new_dungeon, 0],
              [open_curtain, 5],
              [scene_change, 0]]
-    resolved_stairs_steps = step_by_step(steps, resolved_stairs_steps, 1)
+    resolved_stairs_steps = step_by_step(steps, resolved_stairs_steps, speed)
 
 def step_by_step(steps, resolved, spd=1):
     now = tmr*spd
@@ -594,9 +590,7 @@ def main(): # メイン処理
                 sys.exit()
             if event.type == KEYDOWN:
                 if event.key == K_s:
-                    speed += 1
-                    if speed == 4:
-                        speed = 1
+                    speed = speed%3+1
         
         tmr += 1
         key = pygame.key.get_pressed()
