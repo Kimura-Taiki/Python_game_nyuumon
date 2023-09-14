@@ -234,23 +234,21 @@ def draw_battle(bg, fnt): # 戦闘画面の描画
 
 def battle_command(bg, fnt, key): # コマンドの入力と表示
     global btl_cmd
-    def cmd_select(b_e, k_code, func):
-        return func(b_e) if key[k_code] else b_e
-    def assign_cmd(b_e, cmd):
-        return cmd, True
-    def shift_cmd(b_e, shift, mod):
-        return (b_e[0]+shift+mod)%mod, False
-    def decide_cmd(b_e):
-        return b_e[0], True
+    def assign_cmd(b_e, k_code, cmd):
+        return (cmd, True) if key[k_code] else b_e
+    def shift_cmd(b_e, k_code, shift, mod):
+        return ((b_e[0]+shift+mod)%mod, False) if key[k_code] else b_e
+    def decide_cmd(b_e, k_code):
+        return (b_e[0], True) if key[k_code] else b_e
     btl_cmd, ent = pipeline_each((btl_cmd, False), [
-        partial(cmd_select, k_code=K_a, func=partial(assign_cmd, cmd=0)), # Aキー
-        partial(cmd_select, k_code=K_a, func=partial(assign_cmd, cmd=1)), # Pキー
-        partial(cmd_select, k_code=K_a, func=partial(assign_cmd, cmd=2)), # Bキー
-        partial(cmd_select, k_code=K_a, func=partial(assign_cmd, cmd=3)), # Rキー
-        partial(cmd_select, k_code=K_UP, func=partial(shift_cmd, shift=-1, mod=4)), # ↑キー
-        partial(cmd_select, k_code=K_DOWN, func=partial(shift_cmd, shift=1, mod=4)), # ↓キー
-        partial(cmd_select, k_code=K_SPACE, func=decide_cmd), # 空白キー
-        partial(cmd_select, k_code=K_RETURN, func=decide_cmd) # 改行キー
+        partial(assign_cmd, k_code=K_a, cmd=0), # Aキー
+        partial(assign_cmd, k_code=K_p, cmd=1), # Pキー
+        partial(assign_cmd, k_code=K_b, cmd=2), # Bキー
+        partial(assign_cmd, k_code=K_r, cmd=3), # Rキー
+        partial(shift_cmd, k_code=K_UP, shift=-1, mod=4), # ↑キー
+        partial(shift_cmd, k_code=K_DOWN, shift=1, mod=4), # ↓キー
+        partial(decide_cmd, k_code=K_SPACE), # 空白キー
+        partial(decide_cmd, k_code=K_RETURN) # 改行キー
         ])
     for i in range(4):
         c = WHITE
