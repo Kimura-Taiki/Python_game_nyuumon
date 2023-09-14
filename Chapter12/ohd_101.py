@@ -110,6 +110,9 @@ def put_protag(dgn): # 主人公をダンジョン上の空白地にランダム
     pl_x, pl_y = space(dgn)
     pl_d = 1
     pl_a = 2
+    # 以下は階段処理を見る為の追記
+    global dungeon
+    dungeon[pl_y][pl_x-1] = 3
 
 def move_player(key): # 主人公の移動
     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
