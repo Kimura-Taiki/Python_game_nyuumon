@@ -399,27 +399,20 @@ def scene_game_over(): # ゲームオーバー
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_on_enemy(): # 戦闘準備
-    # global idx, tmr
     global scene_steps
-    # if tmr == 1:
     def battle_start():
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_battle.ogg")
         pygame.mixer.music.play(-1)
         init_battle()
         init_message()
-    # elif tmr <= 4:
     def encounter():
         bx = (4-tmr)*220
         by = 0
         screen.blit(imgBtlBG, [bx, by])
         draw_text(screen, "Encounter!", 350, 200, font, WHITE)
-    # elif tmr <= 16:
     def enemy_appear():
         draw_battle(screen, fontS)
         draw_text(screen, emy_name+" appear!", 300, 200, font, WHITE)
-    # else:
-        # idx = Idx.BATTLE_WFI
-        # tmr = 0
     steps = [[battle_start, 0],
              [encounter, 4],
              [enemy_appear, 12],
@@ -431,18 +424,25 @@ def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
     draw_battle(screen, fontS)
     if tmr == 1: set_message("Your turn.")
     if battle_command(screen, font, key) == True:
-        if btl_cmd == 0:
-            idx = Idx.ATTACK
-            tmr = 0
-        if btl_cmd == 1 and potion > 0:
-            idx = Idx.POTION
-            tmr = 0
-        if btl_cmd == 2 and blazegem > 0:
-            idx = Idx.BLAZE_GEM
-            tmr = 0
-        if btl_cmd == 3:
-            idx = Idx.ESCAPE
-            tmr = 0
+        cmd_list = [[0, partial(scene_change, enum=Idx.ATTACK)],
+                    [1, partial(scene_change, enum=Idx.POTION)],
+                    [2, partial(scene_change, enum=Idx.BLAZE_GEM)],
+                    [3, partial(scene_change, enum=Idx.ESCAPE)]]
+        for cmd in cmd_list:
+            if btl_cmd == cmd[0]:
+                cmd[1]()
+        # if btl_cmd == 0:
+        #     idx = Idx.ATTACK
+        #     tmr = 0
+        # if btl_cmd == 1 and potion > 0:
+        #     idx = Idx.POTION
+        #     tmr = 0
+        # if btl_cmd == 2 and blazegem > 0:
+        #     idx = Idx.BLAZE_GEM
+        #     tmr = 0
+        # if btl_cmd == 3:
+        #     idx = Idx.ESCAPE
+        #     tmr = 0
 
 def scene_attack(): # プレイヤーの攻撃
     global idx, tmr, dmg, emy_blink, emy_life
