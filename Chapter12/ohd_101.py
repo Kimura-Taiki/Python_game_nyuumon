@@ -113,6 +113,7 @@ def put_protag(dgn): # 主人公をダンジョン上の空白地にランダム
 
 def move_player(key): # 主人公の移動
     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
+    # 乗ったイベントに応じてイベント発動
     def on_event(bool, chip, i, func):
         global dungeon, pl_x, pl_y, idx, tmr
         if dungeon[pl_y][pl_x] != chip: return bool
@@ -142,36 +143,6 @@ def move_player(key): # 主人公の移動
                           partial(on_event, chip=2,                                         i=Idx.ON_ENEMY, func=shift_scene_only),
                           partial(on_event, chip=3,                                         i=Idx.ON_STAIRS,func=shift_scene_only)])
 
-    # if dungeon[pl_y][pl_x] == 1: # 宝箱に載った
-    #     dungeon[pl_y][pl_x] = 0
-    #     treasure = random.choice([0,0,0,1,1,1,1,1,1,2])
-    #     if treasure == 0:
-    #         potion += 1
-    #     if treasure == 1:
-    #         blazegem += 1
-    #     if treasure == 2:
-    #         food = int(food/2)
-    #     idx = Idx.ON_ITEM
-    #     tmr = 0
-    #     return
-    # if dungeon[pl_y][pl_x] == 2: # 繭に載った
-    #     dungeon[pl_y][pl_x] = 0
-    #     r = random.randint(0, 99)
-    #     if r < 40: # 食料
-    #         treasure = random.choice([3,3,3,4])
-    #         if treasure == 3: food += 20
-    #         if treasure == 4: food += 100
-    #         idx = Idx.ON_ITEM
-    #         tmr = 0
-    #     else: # 敵出現
-    #         idx = Idx.ON_ENEMY
-    #         tmr = 0
-    #         return
-    # if dungeon[pl_y][pl_x] == 3: # 階段に載った
-    #     idx = Idx.ON_STAIRS
-    #     tmr = 0
-    #     return
-    
     # 方向キーで上下左右に移動
     def move(bool, k_code, dir, dx, dy):
         global pl_x, pl_y, pl_d
@@ -202,73 +173,6 @@ def eat_food(food, pl_life, pl_lifemax):
     else:
         pl_life = pl_life-5 if pl_life>5 else 0
     return food, pl_life
-
-# def move_player(key): # 主人公の移動
-#     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
-
-#     if dungeon[pl_y][pl_x] == 1: # 宝箱に載った
-#         dungeon[pl_y][pl_x] = 0
-#         treasure = random.choice([0,0,0,1,1,1,1,1,1,2])
-#         if treasure == 0:
-#             potion += 1
-#         if treasure == 1:
-#             blazegem += 1
-#         if treasure == 2:
-#             food = int(food/2)
-#         idx = Idx.ON_ITEM
-#         tmr = 0
-#         return
-#     if dungeon[pl_y][pl_x] == 2: # 繭に載った
-#         dungeon[pl_y][pl_x] = 0
-#         r = random.randint(0, 99)
-#         if r < 40: # 食料
-#             treasure = random.choice([3,3,3,4])
-#             if treasure == 3: food += 20
-#             if treasure == 4: food += 100
-#             idx = Idx.ON_ITEM
-#             tmr = 0
-#         else: # 敵出現
-#             idx = Idx.ON_ENEMY
-#             tmr = 0
-#             return
-#     if dungeon[pl_y][pl_x] == 3: # 階段に載った
-#         idx = Idx.ON_STAIRS
-#         tmr = 0
-#         return
-    
-#     # 方向キーで上下左右に移動
-#     x = pl_x
-#     y = pl_y
-#     if key[K_UP] == 1:
-#         pl_d = 0
-#         if dungeon[pl_y-1][pl_x] != 9:
-#             pl_y -= 1
-#     if key[K_DOWN] == 1:
-#         pl_d = 1
-#         if dungeon[pl_y+1][pl_x] != 9:
-#             pl_y += 1
-#     if key[K_LEFT] == 1:
-#         pl_d = 2
-#         if dungeon[pl_y][pl_x-1] != 9:
-#             pl_x -= 1
-#     if key[K_RIGHT] == 1:
-#         pl_d = 3
-#         if dungeon[pl_y][pl_x+1] != 9:
-#             pl_x += 1
-#     pl_a = pl_d*2
-#     if pl_x != x or pl_y != y: # 移動したら食料の量と体力を計算
-#         pl_a += tmr%2 # 移動したら足踏みのアニメーション
-#         if food > 0:
-#             food -= 1
-#             if pl_life < pl_lifemax:
-#                 pl_life += 1
-#         else:
-#             pl_life -= 5
-#             if pl_life <= 0:
-#                 pl_life = 0
-#                 pygame.mixer.music.stop()
-#                 idx = Idx.GAME_OVER
-#                 tmr = 0
 
 def draw_text(bg, txt, x, y, fnt, col): # 影付き文字の表示
     sur = fnt.render(txt, True, BLACK)
@@ -330,25 +234,24 @@ def draw_battle(bg, fnt): # 戦闘画面の描画
 
 def battle_command(bg, fnt, key): # コマンドの入力と表示
     global btl_cmd
-    ent = False
-    if key[K_a]: # Aキー
-        btl_cmd = 0
-        ent = True
-    if key[K_p]: # Pキー
-        btl_cmd = 1
-        ent = True
-    if key[K_b]: # Bキー
-        btl_cmd = 2
-        ent = True
-    if key[K_r]: # Rキー
-        btl_cmd = 3
-        ent = True
-    if key[K_UP] and btl_cmd > 0: # ↑キー
-        btl_cmd -= 1
-    if key[K_DOWN] and btl_cmd < 3: # Aキー
-        btl_cmd += 1
-    if key[K_SPACE] or key[K_RETURN]:
-        ent = True
+    def cmd_select(b_e, k_code, func):
+        return func(b_e) if key[k_code] else b_e
+    def assign_cmd(b_e, cmd):
+        return cmd, True
+    def shift_cmd(b_e, shift, mod):
+        return (b_e[0]+shift+mod)%mod, False
+    def decide_cmd(b_e):
+        return b_e[0], True
+    btl_cmd, ent = pipeline_each((btl_cmd, False), [
+        partial(cmd_select, k_code=K_a, func=partial(assign_cmd, cmd=0)), # Aキー
+        partial(cmd_select, k_code=K_a, func=partial(assign_cmd, cmd=1)), # Pキー
+        partial(cmd_select, k_code=K_a, func=partial(assign_cmd, cmd=2)), # Bキー
+        partial(cmd_select, k_code=K_a, func=partial(assign_cmd, cmd=3)), # Rキー
+        partial(cmd_select, k_code=K_UP, func=partial(shift_cmd, shift=-1, mod=4)), # ↑キー
+        partial(cmd_select, k_code=K_DOWN, func=partial(shift_cmd, shift=1, mod=4)), # ↓キー
+        partial(cmd_select, k_code=K_SPACE, func=decide_cmd), # 空白キー
+        partial(cmd_select, k_code=K_RETURN, func=decide_cmd) # 改行キー
+        ])
     for i in range(4):
         c = WHITE
         if btl_cmd == i: c = BLINK[tmr%6]
@@ -647,7 +550,7 @@ scenes[Idx.BLAZE_GEM] = scene_blaze_gem
 scenes[Idx.BATTLE_END] = scene_battle_end
 
 def main(): # メイン処理
-    global key, tmr, speed
+    global key, idx, tmr, speed
 
     clock = pygame.time.Clock()
 
