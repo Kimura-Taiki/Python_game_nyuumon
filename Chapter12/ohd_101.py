@@ -431,18 +431,6 @@ def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
         for cmd in cmd_list:
             if btl_cmd == cmd[0]:
                 cmd[1]()
-        # if btl_cmd == 0:
-        #     idx = Idx.ATTACK
-        #     tmr = 0
-        # if btl_cmd == 1 and potion > 0:
-        #     idx = Idx.POTION
-        #     tmr = 0
-        # if btl_cmd == 2 and blazegem > 0:
-        #     idx = Idx.BLAZE_GEM
-        #     tmr = 0
-        # if btl_cmd == 3:
-        #     idx = Idx.ESCAPE
-        #     tmr = 0
 
 def scene_attack(): # プレイヤーの攻撃
     global idx, tmr, dmg, emy_blink, emy_life
@@ -550,6 +538,10 @@ def scene_potion(): # Potion
     global idx, tmr, pl_life, potion
     draw_battle(screen, fontS)
     if tmr == 1:
+        if potion == 0:
+            set_message("No Potion.")
+            scene_change(enum=Idx.BATTLE_WFI)
+            return
         set_message("Potion!")
         se[2].play()
     if tmr == 6:
@@ -561,13 +553,17 @@ def scene_potion(): # Potion
 
 def scene_blaze_gem(): # Blaze gem
     global idx, tmr, blazegem, dmg
+    if (tmr == 1) and (blazegem == 0):
+        set_message("No Blaze Gem.")
+        scene_change(enum=Idx.BATTLE_WFI)
+        return
+    set_message("Blaze gem!")
     draw_battle(screen, fontS)
     img_rz = pygame.transform.rotozoom(imgEffect[1], 30*tmr, (12-tmr)/8)
     X = 440-img_rz.get_width()/2
     Y = 360-img_rz.get_height()/2
     screen.blit(img_rz, [X, Y])
     if tmr == 1:
-        set_message("Blaze gem!")
         se[1].play()
     if tmr == 6:
         blazegem -= 1
