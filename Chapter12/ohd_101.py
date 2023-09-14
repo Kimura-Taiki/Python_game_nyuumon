@@ -353,12 +353,16 @@ def scene_change(enum):
     tmr = 0
 
 def step_by_step(steps, resolved, spd=1):
+    global idx
     now = tmr*spd
     acc = 0
     for i, step in enumerate(steps):
         acc += step[1]
         if (now < acc) or (i >= resolved):
+            past_idx = idx
             step[0]()
+            if idx != past_idx:
+                return 0
             return ((resolved+1)%len(steps)) if i >= resolved else resolved
 
 get_item_steps = 0
@@ -433,26 +437,43 @@ def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
                 cmd[1]()
 
 def scene_attack(): # プレイヤーの攻撃
-    global idx, tmr, dmg, emy_blink, emy_life
+    # global idx, tmr, dmg, emy_blink, emy_life
+    global scene_steps
     draw_battle(screen, fontS)
-    if tmr == 1:
+    # if tmr == 1:
+    def slash():
+        global dmg
         set_message("You attack!")
         se[0].play()
         dmg = pl_str + random.randint(0, 9)
-    if 2 <= tmr and tmr <= 4:
+    # if 2 <= tmr and tmr <= 4:
+    def shake_bg():
         screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
-    if tmr == 5:
+    # if tmr == 5:
+    def shake_enemy():
+        global emy_blink
         emy_blink = 5
         set_message(str(dmg)+"pts of damage!")
-    if tmr == 11:
+    # if tmr == 11:
+    def settle_damage():
+        global emy_life
         emy_life -= dmg
         if emy_life <= 0:
             emy_life = 0
-            idx = Idx.WIN
-            tmr = 0
-    if tmr == 16:
-        idx = Idx.ENEMY_TURN
-        tmr = 0
+            scene_change(Idx.WIN)
+    #         idx = Idx.WIN
+    #         tmr = 0
+    # if tmr == 16:
+    #     idx = Idx.ENEMY_TURN
+    #     tmr = 0
+    steps = [[slash, 0],
+             [shake_bg, 5],
+             [shake_enemy, 0],
+             [pass_method, 5],
+             [settle_damage, 0],
+             [pass_method, 5],
+             [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_enemy_turn(): # 敵のターン、敵の攻撃
     global idx, tmr, emy_step, dmg, dmg_eff, pl_life
