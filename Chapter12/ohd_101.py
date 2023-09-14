@@ -314,17 +314,19 @@ def scene_field_wfi(): # プレイヤーの移動
         welcome -= 1
         draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
 
+resolved_stairs_steps = 0
 def scene_on_stairs(): # 画面切り替え
-    global idx, tmr, floor, fl_max, welcome
-    global dungeon, screen, fontS
-    draw_dungeon(screen, fontS)
+    global screen, fontS, tmr, resolved_stairs_steps
     def close_curtain():
         global tmr, screen
+        print("{} : {}だよ".format(tmr, "close_curtain"))
         h = 80*tmr
         pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
         pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
-    def go_down_stairs():
+    def make_new_dungeon():
         global floor, fl_max, welcome, dungeon
+        pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
+        print("{} : {}だよ".format(tmr, "make_new_dungeon"))
         floor += 1
         if floor > fl_max:
             fl_max = floor
@@ -333,21 +335,31 @@ def scene_on_stairs(): # 画面切り替え
         put_protag(dungeon)
     def open_curtain():
         global tmr, screen
+        print("{} : {}だよ".format(tmr, "open_curtain"))
         h = 80*(10-tmr)
         pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
         pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
     def scene_change():
-        global idx, tmr
+        global idx, tmr, resolved_stairs_steps
+        print("{} : {}だよ".format(tmr, "scene_change"))
         idx = Idx.FIELD_WFI
         tmr = 0
-    if 1 <= tmr and tmr <= 5:
-        close_curtain()
-    if tmr == 5:
-        go_down_stairs()
-    if 6 <= tmr and tmr <= 9:
-        open_curtain()
-    if tmr == 10:
-        scene_change()
+        resolved_stairs_steps = 0
+    draw_dungeon(screen, fontS)
+    steps = [[close_curtain, 5],
+             [make_new_dungeon, 0],
+             [open_curtain, 5],
+             [scene_change, 0]]
+    resolved_stairs_steps = step_by_step(steps, resolved_stairs_steps, 1)
+
+def step_by_step(steps, resolved, spd=1):
+    now = tmr*spd
+    acc = 0
+    for i, step in enumerate(steps):
+        acc += step[1]
+        if (now < acc) or (i >= resolved):
+            step[0]()
+            return ((resolved+1)%len(steps)) if i >= resolved else resolved
 
 def kugiri():
     pass

@@ -1,8 +1,7 @@
     # 改行を半角4つにするためのコメント欄だよ
 
-a = [0, 1]
-b = [2, 3]
-c = a+b
-print(c)
-c += b
-print(c)
+def f(a):
+  a+=1
+  return error
+
+print(f(4))
