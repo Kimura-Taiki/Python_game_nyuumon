@@ -315,26 +315,44 @@ def scene_field_wfi(): # プレイヤーの移動
         draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
 
 def scene_on_stairs(): # 画面切り替え
-    global idx, floor, fl_max, welcome
-    global dungeon
+    global idx, tmr, floor, fl_max, welcome
+    global dungeon, screen, fontS
     draw_dungeon(screen, fontS)
-    if 1 <= tmr and tmr <= 5:
+    def close_curtain():
+        global tmr, screen
         h = 80*tmr
         pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
         pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
-    if tmr == 5:
+    def go_down_stairs():
+        global floor, fl_max, welcome, dungeon
         floor += 1
         if floor > fl_max:
             fl_max = floor
         welcome = 15
         dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
         put_protag(dungeon)
-    if 6 <= tmr and tmr <= 9:
+    def open_curtain():
+        global tmr, screen
         h = 80*(10-tmr)
         pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
         pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
-    if tmr == 10:
+    def scene_change():
+        global idx, tmr
         idx = Idx.FIELD_WFI
+        tmr = 0
+    if 1 <= tmr and tmr <= 5:
+        close_curtain()
+    if tmr == 5:
+        go_down_stairs()
+    if 6 <= tmr and tmr <= 9:
+        open_curtain()
+    if tmr == 10:
+        scene_change()
+
+def kugiri():
+    pass
+# def scene_on_stairs(): # 画面切り替え
+
 
 def scene_on_item(): # アイテム入手もしくはトラップ
     global idx
