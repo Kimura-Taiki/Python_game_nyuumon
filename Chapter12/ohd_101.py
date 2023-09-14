@@ -359,23 +359,24 @@ def step_by_step(steps, resolved, spd=1):
             step[0]()
             return ((resolved+1)%len(steps)) if i >= resolved else resolved
 
-# get_item_steps = 0
-# def scene_on_item(): # アイテム入手もしくはトラップ
-#     global idx, get_item_steps
-#     def draw_get_item():
-#         draw_dungeon(screen, fontS)
-#         screen.blit(imgItem[treasure], [320, 220])
-#         draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
-#     def 
-#         idx = Idx.FIELD_WFI
-
+get_item_steps = 0
 def scene_on_item(): # アイテム入手もしくはトラップ
-    global idx
-    draw_dungeon(screen, fontS)
-    screen.blit(imgItem[treasure], [320, 220])
-    draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
-    if tmr == 10:
-        idx = Idx.FIELD_WFI
+    global idx, get_item_steps
+    def draw_get_item():
+        draw_dungeon(screen, fontS)
+        screen.blit(imgItem[treasure], [320, 220])
+        draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
+    steps = [[draw_get_item, 10],
+             [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
+    get_item_steps = step_by_step(steps, get_item_steps, speed)
+
+# def scene_on_item(): # アイテム入手もしくはトラップ
+#     global idx
+#     draw_dungeon(screen, fontS)
+#     screen.blit(imgItem[treasure], [320, 220])
+#     draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
+#     if tmr == 10:
+#         idx = Idx.FIELD_WFI
 
 def pass_func(ret=False):
     return ret
