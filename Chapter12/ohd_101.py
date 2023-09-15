@@ -527,21 +527,14 @@ def scene_lose(): # 敗北
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_win(): # 勝利
-    # global idx, tmr
     global scene_steps
     draw_battle(screen, fontS)
-    # if tmr == 1:
     def you_win():
         set_message("you win!")
         pygame.mixer.music.stop()
         se[5].play()
-    # if tmr == 28:
     def win_end():
-        # idx = Idx.BATTLE_END
-        # if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
-        #     idx = Idx.LEVEL_UP
-        #     tmr = 0
-        if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
+        if random.randint(0, emy_lifemax) > 0:# random.randint(0, pl_lifemax):
             scene_change(Idx.LEVEL_UP)
         else:
             scene_change(Idx.BATTLE_END)
@@ -551,21 +544,35 @@ def scene_win(): # 勝利
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_level_up(): # レベルアップ
-    global idx, tmr, pl_lifemax, pl_str
+    # global idx, tmr, pl_lifemax, pl_str
+    global scene_steps
     draw_battle(screen, fontS)
-    if tmr == 1:
+    # if tmr == 1:
+    def level_up():
         set_message("Level up!")
         se[4].play()
-    if tmr == 21:
+    # if tmr == 21:
+    def max_life_plus():
+        global pl_lifemax
         lif_p = random.randint(10, 20)
         set_message("Max life + "+str(lif_p))
         pl_lifemax += lif_p
-    if tmr == 26:
+    # if tmr == 26:
+    def str_plus():
+        global pl_str
         str_p = random.randint(5, 10)
         set_message("Str + "+str(str_p))
         pl_str += str_p
-    if tmr == 50:
-        idx = Idx.BATTLE_END
+    # if tmr == 50:
+    #     idx = Idx.BATTLE_END
+    steps = [[level_up, 0],
+             [pass_method, 20],
+             [max_life_plus, 0],
+             [pass_method, 5],
+             [str_plus, 0],
+             [pass_method, 25],
+             [partial(scene_change, enum=Idx.BATTLE_END), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_potion(): # Potion
     global idx, tmr, pl_life, potion
