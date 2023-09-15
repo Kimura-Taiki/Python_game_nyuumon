@@ -476,8 +476,8 @@ def scene_enemy_turn(): # 敵のターン、敵の攻撃
         se[0].play()
         emy_step = 30
     def shake_protag():
-        global dmg_eff, emy_step
-        dmg = emy_str + random.randint(0, 9)
+        global dmg, dmg_eff, emy_step
+        dmg = emy_str + random.randint(0, 9)+300
         set_message(str(dmg)+"pts of damage!")
         dmg_eff = 5
         emy_step = 0
@@ -519,12 +519,17 @@ def scene_lose(): # 敗北
     # global idx, tmr
     global scene_steps
     draw_battle(screen, fontS)
-    if tmr == 1:
+    # if tmr == 1:
+    def you_lose():
         pygame.mixer.music.stop()
         set_message("You lose.")
-    if tmr == 11:
-        idx = Idx.GAME_OVER
-        tmr = 29
+    # if tmr == 11:
+    #     idx = Idx.GAME_OVER
+    #     tmr = 29
+    steps = [[you_lose, 0],
+             [pass_method, 12],
+             [partial(scene_change, enum=Idx.GAME_OVER), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_win(): # 勝利
     global idx, tmr
