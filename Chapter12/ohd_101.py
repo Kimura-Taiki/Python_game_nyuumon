@@ -438,34 +438,34 @@ def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
             if btl_cmd == cmd[0]:
                 cmd[1]()
 
-def scene_attack(): # プレイヤーの攻撃
-    global scene_steps
-    draw_battle(screen, fontS)
-    def slash():
-        global dmg
-        set_message("You attack!")
-        se[0].play()
-        dmg = pl_str + random.randint(0, 9)
-    def shake_bg():
-        screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
-    def shake_enemy():
-        global emy_blink
-        emy_blink = 5
-        set_message(str(dmg)+"pts of damage!")
-    def settle_damage():
-        global emy_life
-        emy_life -= dmg
-        if emy_life <= 0:
-            emy_life = 0
-            scene_change(Idx.WIN)
-    steps = [[slash, 0],
-             [shake_bg, 5],
-             [shake_enemy, 0],
-             [pass_method, 5],
-             [settle_damage, 0],
-             [pass_method, 5],
-             [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+# def scene_attack(): # プレイヤーの攻撃
+#     global scene_steps
+#     draw_battle(screen, fontS)
+#     def slash():
+#         global dmg
+#         set_message("You attack!")
+#         se[0].play()
+#         dmg = pl_str + random.randint(0, 9)
+#     def shake_bg():
+#         screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
+#     def shake_enemy():
+#         global emy_blink
+#         emy_blink = 5
+#         set_message(str(dmg)+"pts of damage!")
+#     def settle_damage():
+#         global emy_life
+#         emy_life -= dmg
+#         if emy_life <= 0:
+#             emy_life = 0
+#             scene_change(Idx.WIN)
+#     steps = [[slash, 0],
+#              [shake_bg, 5],
+#              [shake_enemy, 0],
+#              [pass_method, 5],
+#              [settle_damage, 0],
+#              [pass_method, 5],
+#              [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
+#     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_enemy_turn(): # 敵のターン、敵の攻撃
     global scene_steps
@@ -623,7 +623,7 @@ def scene_blaze_gem(): # Blaze gem
         # tmr = 4
     steps = [[has_blaze_gem, 0],
              [draw_blaze, 11],
-             [partial(scene_change, enum=Idx.ATTACK), 0]]
+             [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_battle_end(): # 戦闘終了
@@ -659,6 +659,41 @@ def scene_game_over(): # ゲームオーバー
              [partial(scene_change, enum=Idx.TITLE), 0]]
     scene_steps = step_by_step(steps, scene_steps, speed)
 
+def scene_attack(): # プレイヤーの攻撃
+    global scene_steps
+    draw_battle(screen, fontS)
+    def slash():
+        global dmg
+        set_message("You attack!")
+        se[0].play()
+        dmg = pl_str + random.randint(0, 9)
+    def shake_bg():
+        screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
+    steps = [[slash, 0],
+             [shake_bg, 5],
+             [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
+
+def scene_damaged_enemy(): # 敵の被弾
+    global scene_steps
+    draw_battle(screen, fontS)
+    def shake_enemy():
+        global emy_blink
+        emy_blink = 5
+        set_message(str(dmg)+"pts of damage!")
+    def settle_damage():
+        global emy_life
+        emy_life -= dmg
+        if emy_life <= 0:
+            emy_life = 0
+            scene_change(Idx.WIN)
+    steps = [[shake_enemy, 0],
+             [pass_method, 5],
+             [settle_damage, 0],
+             [pass_method, 5],
+             [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
+
 
 scenes = {}
 scenes[Idx.TITLE] = scene_title
@@ -678,6 +713,7 @@ scenes[Idx.POTION] = scene_potion
 scenes[Idx.BLAZE_GEM] = scene_blaze_gem
 scenes[Idx.BATTLE_END] = scene_battle_end
 scenes[Idx.FALLEN] = scene_fallen
+scenes[Idx.DAMAGED_ENEMY] = scene_damaged_enemy
 
 def main(): # メイン処理
     global key, idx, tmr, speed

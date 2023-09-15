@@ -1,9 +1,27 @@
     # 改行を半角4つにするためのコメント欄だよ
 
-def f(*args):
-  return args
+from enum import Enum
 
-print(f(tmr=4))
+class TemplateColor(Enum):
+    NAME = (1, "赤" ,[255, 0, 0])
+    ADRESS = (2 , "緑", [0, 255, 0])
+    TEL = (3 , "青", [0, 0, 255])
+    
+    def __init__(self, id, color_name, rgb) -> None:
+        super().__init__()
+        self.id = id
+        self.color_name = color_name
+        self.rgb = rgb
+
+print("zzz")
+print(TemplateColor.NAME.rgb)
+
+print(TemplateColor)
+for area in TemplateColor:
+    area_name = area.name  # NAME , ADDRESS , TEL
+    aera_rgb = area.rgb
+    print(area) # rgb値を与えたら値が返ってくる素晴らしい処理
+
 
 # # 関数の処理時間を計測
 # from functools import wraps

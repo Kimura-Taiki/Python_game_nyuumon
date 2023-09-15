@@ -18,3 +18,4 @@ class Idx(Enum):
     BLAZE_GEM = 21
     BATTLE_END = 22
     FALLEN = 23
+    DAMAGED_ENEMY = 24
