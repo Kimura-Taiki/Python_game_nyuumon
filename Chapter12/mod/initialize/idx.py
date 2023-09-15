@@ -17,3 +17,4 @@ class Idx(Enum):
     POTION = 20
     BLAZE_GEM = 21
     BATTLE_END = 22
+    FALLEN = 23

@@ -170,10 +170,11 @@ def move_player(key): # 主人公の移動
         food, pl_life = eat_food(food, pl_life, pl_lifemax)
         if pl_life <= 0:
             pygame.mixer.music.stop()
-            idx = Idx.GAME_OVER
+            idx = Idx.FALLEN
             tmr = 0
 
 def eat_food(food, pl_life, pl_lifemax):
+    # pl_life -= 100
     if food > 0:
         food -= 1
         pl_life = pl_life+1 if pl_life<pl_lifemax else pl_lifemax
@@ -357,7 +358,7 @@ def step_by_step(steps, resolved, spd=1):
     now = tmr*spd
     acc = 0
     for i, step in enumerate(steps):
-        print("now={}, acc={}, i={}, step={}".format(now, acc, i, step))
+        # print("now={}, acc={}, i={}, step={}".format(now, acc, i, step))
         acc += step[1]
         if (now < acc) or (i >= resolved):
             past_idx = idx
@@ -381,27 +382,27 @@ def pass_method():
     return
 
 scene_steps = 0
-def scene_game_over(): # ゲームオーバー
-    global idx, tmr, pl_a, scene_steps
-    def staggered():
-        global pl_a
-        PL_TURN = [2, 4, 0, 6]
-        pl_a = PL_TURN[tmr%4]
-        draw_dungeon(screen, fontS)
-    def fallen():
-        global pl_a
-        pl_a = 8
-        draw_dungeon(screen, fontS)
-    def you_died():
-        se[3].play()
-        draw_text(screen, "You died.", 360, 240, font, RED)
-        draw_text(screen, "Game over.", 360, 380, font, RED)
-    steps = [[staggered, 28],
-             [fallen, 0],
-             [you_died, 0],
-             [pass_method, 70],
-             [partial(scene_change, enum=Idx.TITLE), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+# def scene_game_over(): # ゲームオーバー
+#     global idx, tmr, pl_a, scene_steps
+#     def staggered():
+#         global pl_a
+#         PL_TURN = [2, 4, 0, 6]
+#         pl_a = PL_TURN[tmr%4]
+#         draw_dungeon(screen, fontS)
+#     def fallen():
+#         global pl_a
+#         pl_a = 8
+#         draw_dungeon(screen, fontS)
+#     def you_died():
+#         se[3].play()
+#         draw_text(screen, "You died.", 360, 240, font, RED)
+#         draw_text(screen, "Game over.", 360, 380, font, RED)
+#     steps = [[staggered, 28],
+#              [fallen, 0],
+#              [you_died, 0],
+#              [pass_method, 70],
+#              [partial(scene_change, enum=Idx.TITLE), 0]]
+#     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_on_enemy(): # 戦闘準備
     global scene_steps
@@ -498,24 +499,13 @@ def scene_enemy_turn(): # 敵のターン、敵の攻撃
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_escape(): # 逃げられる？
-    # global idx, tmr
     global scene_steps
     draw_battle(screen, fontS)
-    # if tmr == 1: set_message("…")
-    # if tmr == 2: set_message("……")
-    # if tmr == 3: set_message("………")
-    # if tmr == 4: set_message("…………")
-    # if tmr == 5:
     def escape_judgement():
-        # if random.randint(0, 99) < 60:
-        if random.randint(0, 99) < 0:
+        if random.randint(0, 99) < 60:
             scene_change(Idx.BATTLE_END)
-            # idx = Idx.BATTLE_END
         else:
             set_message("You failed to flee.")
-    # if tmr == 10:
-    #     idx = Idx.ENEMY_TURN
-    #     tmr = 0
     steps = [[partial(set_message, msg="…"), 1],
              [partial(set_message, msg="……"), 1],
              [partial(set_message, msg="………"), 1],
@@ -526,7 +516,8 @@ def scene_escape(): # 逃げられる？
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_lose(): # 敗北
-    global idx, tmr
+    # global idx, tmr
+    global scene_steps
     draw_battle(screen, fontS)
     if tmr == 1:
         pygame.mixer.music.stop()
@@ -609,6 +600,35 @@ def scene_battle_end(): # 戦闘終了
     pygame.mixer.music.play(-1)
     idx = Idx.FIELD_WFI
 
+def scene_fallen(): # フィールド上でよろめいて倒れる
+    global scene_steps
+    def staggered():
+        global pl_a
+        PL_TURN = [2, 4, 0, 6]
+        pl_a = PL_TURN[tmr%4]
+        draw_dungeon(screen, fontS)
+    def fallen():
+        global pl_a
+        pl_a = 8
+        draw_dungeon(screen, fontS)
+    steps = [[staggered, 28],
+             [fallen, 0],
+             [partial(scene_change, enum=Idx.GAME_OVER), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
+
+def scene_game_over(): # ゲームオーバー
+    # global idx, tmr, pl_a, scene_steps
+    global scene_steps
+    def you_died():
+        se[3].play()
+        draw_text(screen, "You died.", 360, 240, font, RED)
+        draw_text(screen, "Game over.", 360, 380, font, RED)
+    steps = [[you_died, 0],
+             [pass_method, 70],
+             [partial(scene_change, enum=Idx.TITLE), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
+
+
 scenes = {}
 scenes[Idx.TITLE] = scene_title
 scenes[Idx.FIELD_WFI] = scene_field_wfi
@@ -626,6 +646,7 @@ scenes[Idx.LEVEL_UP] = scene_level_up
 scenes[Idx.POTION] = scene_potion
 scenes[Idx.BLAZE_GEM] = scene_blaze_gem
 scenes[Idx.BATTLE_END] = scene_battle_end
+scenes[Idx.FALLEN] = scene_fallen
 
 def main(): # メイン処理
     global key, idx, tmr, speed
