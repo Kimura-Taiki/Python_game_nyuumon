@@ -477,7 +477,7 @@ def scene_enemy_turn(): # 敵のターン、敵の攻撃
         emy_step = 30
     def shake_protag():
         global dmg, dmg_eff, emy_step
-        dmg = emy_str + random.randint(0, 9)+300
+        dmg = emy_str + random.randint(0, 9)
         set_message(str(dmg)+"pts of damage!")
         dmg_eff = 5
         emy_step = 0
@@ -516,33 +516,39 @@ def scene_escape(): # 逃げられる？
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_lose(): # 敗北
-    # global idx, tmr
     global scene_steps
     draw_battle(screen, fontS)
-    # if tmr == 1:
     def you_lose():
         pygame.mixer.music.stop()
         set_message("You lose.")
-    # if tmr == 11:
-    #     idx = Idx.GAME_OVER
-    #     tmr = 29
     steps = [[you_lose, 0],
              [pass_method, 12],
              [partial(scene_change, enum=Idx.GAME_OVER), 0]]
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_win(): # 勝利
-    global idx, tmr
+    # global idx, tmr
+    global scene_steps
     draw_battle(screen, fontS)
-    if tmr == 1:
+    # if tmr == 1:
+    def you_win():
         set_message("you win!")
         pygame.mixer.music.stop()
         se[5].play()
-    if tmr == 28:
-        idx = Idx.BATTLE_END
+    # if tmr == 28:
+    def win_end():
+        # idx = Idx.BATTLE_END
+        # if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
+        #     idx = Idx.LEVEL_UP
+        #     tmr = 0
         if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
-            idx = Idx.LEVEL_UP
-            tmr = 0
+            scene_change(Idx.LEVEL_UP)
+        else:
+            scene_change(Idx.BATTLE_END)
+    steps = [[you_win, 0],
+             [pass_method, 28],
+             [win_end, 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_level_up(): # レベルアップ
     global idx, tmr, pl_lifemax, pl_str
@@ -622,7 +628,6 @@ def scene_fallen(): # フィールド上でよろめいて倒れる
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_game_over(): # ゲームオーバー
-    # global idx, tmr, pl_a, scene_steps
     global scene_steps
     def you_died():
         se[3].play()
