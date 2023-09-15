@@ -357,6 +357,7 @@ def step_by_step(steps, resolved, spd=1):
     now = tmr*spd
     acc = 0
     for i, step in enumerate(steps):
+        print("now={}, acc={}, i={}, step={}".format(now, acc, i, step))
         acc += step[1]
         if (now < acc) or (i >= resolved):
             past_idx = idx
@@ -466,36 +467,25 @@ def scene_attack(): # プレイヤーの攻撃
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_enemy_turn(): # 敵のターン、敵の攻撃
-    # global idx, tmr, emy_step, dmg, dmg_eff, pl_life
     global scene_steps
     draw_battle(screen, fontS)
-    # if tmr == 1:
-    #     set_message("Enemy turn.")
-    # if tmr == 5:
     def enter_enemy():
         global emy_step
         set_message(emy_name + " attack!")
         se[0].play()
         emy_step = 30
-    # if tmr == 9:
     def shake_protag():
         global dmg_eff, emy_step
         dmg = emy_str + random.randint(0, 9)
         set_message(str(dmg)+"pts of damage!")
         dmg_eff = 5
         emy_step = 0
-    # if tmr == 15:
     def settle_damage():
         global pl_life
         pl_life -= dmg
         if pl_life < 0:
             pl_life = 0
             scene_change(Idx.LOSE)
-            # idx = Idx.LOSE
-            # tmr = 0
-    # if tmr == 20:
-    #     idx = Idx.BATTLE_WFI
-    #     tmr = 0
     steps = [[partial(set_message,msg="Enemy turn."), 0],
              [pass_method, 5],
              [enter_enemy, 0],
@@ -508,20 +498,32 @@ def scene_enemy_turn(): # 敵のターン、敵の攻撃
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_escape(): # 逃げられる？
-    global idx, tmr
+    # global idx, tmr
+    global scene_steps
     draw_battle(screen, fontS)
-    if tmr == 1: set_message("…")
-    if tmr == 2: set_message("……")
-    if tmr == 3: set_message("………")
-    if tmr == 4: set_message("…………")
-    if tmr == 5:
-        if random.randint(0, 99) < 60:
-            idx = Idx.BATTLE_END
+    # if tmr == 1: set_message("…")
+    # if tmr == 2: set_message("……")
+    # if tmr == 3: set_message("………")
+    # if tmr == 4: set_message("…………")
+    # if tmr == 5:
+    def escape_judgement():
+        # if random.randint(0, 99) < 60:
+        if random.randint(0, 99) < 0:
+            scene_change(Idx.BATTLE_END)
+            # idx = Idx.BATTLE_END
         else:
             set_message("You failed to flee.")
-    if tmr == 10:
-        idx = Idx.ENEMY_TURN
-        tmr = 0
+    # if tmr == 10:
+    #     idx = Idx.ENEMY_TURN
+    #     tmr = 0
+    steps = [[partial(set_message, msg="…"), 1],
+             [partial(set_message, msg="……"), 1],
+             [partial(set_message, msg="………"), 1],
+             [partial(set_message, msg="…………"), 1],
+             [escape_judgement, 0],
+             [pass_method, 6],
+             [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_lose(): # 敗北
     global idx, tmr
