@@ -534,7 +534,7 @@ def scene_win(): # 勝利
         pygame.mixer.music.stop()
         se[5].play()
     def win_end():
-        if random.randint(0, emy_lifemax) > 0:# random.randint(0, pl_lifemax):
+        if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
             scene_change(Idx.LEVEL_UP)
         else:
             scene_change(Idx.BATTLE_END)
@@ -569,10 +569,8 @@ def scene_level_up(): # レベルアップ
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_potion(): # Potion
-    # global idx, tmr, pl_life, potion
     global scene_steps
     draw_battle(screen, fontS)
-    # if tmr == 1:
     def has_potion():
         global potion
         if potion == 0:
@@ -581,14 +579,10 @@ def scene_potion(): # Potion
             return
         set_message("Potion!")
         se[2].play()
-    # if tmr == 6:
     def full_recovery():
         global pl_life, potion
         pl_life = pl_lifemax
         potion -= 1
-    # if tmr == 11:
-    #     idx = Idx.ENEMY_TURN
-    #     tmr = 0
     steps = [[has_potion, 0],
              [pass_method, 6],
              [full_recovery, 0],
@@ -597,25 +591,40 @@ def scene_potion(): # Potion
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_blaze_gem(): # Blaze gem
-    global idx, tmr, blazegem, dmg
-    if (tmr == 1) and (blazegem == 0):
-        set_message("No Blaze Gem.")
-        scene_change(enum=Idx.BATTLE_WFI)
-        return
-    set_message("Blaze gem!")
+    # global idx, tmr, blazegem, dmg
+    global scene_steps
     draw_battle(screen, fontS)
-    img_rz = pygame.transform.rotozoom(imgEffect[1], 30*tmr, (12-tmr)/8)
-    X = 440-img_rz.get_width()/2
-    Y = 360-img_rz.get_height()/2
-    screen.blit(img_rz, [X, Y])
-    if tmr == 1:
+    # if (tmr == 1) and (blazegem == 0):
+    def has_blaze_gem():
+        global blazegem, dmg
+        if blazegem == 100:
+            set_message("No Blaze Gem.")
+            scene_change(enum=Idx.BATTLE_WFI)
+            return
+        set_message("Blaze gem!")
         se[1].play()
-    if tmr == 6:
+        draw_blaze()
         blazegem -= 1
-    if tmr == 11:
         dmg = 1000
-        idx = Idx.ATTACK
-        tmr = 4
+    def draw_blaze():
+        img_rz = pygame.transform.rotozoom(imgEffect[1], 30*tmr, (12-tmr)/8)
+        X = 440-img_rz.get_width()/2
+        Y = 360-img_rz.get_height()/2
+        screen.blit(img_rz, [X, Y])
+    # if tmr == 1:
+    # if tmr == 6:
+    # def use_blaze()
+    #     global blazegem, dmg
+    #     draw_blaze(6)
+    #     blazegem -= 1
+    #     dmg = 1000
+    # if tmr == 11:
+        # idx = Idx.ATTACK
+        # tmr = 4
+    steps = [[has_blaze_gem, 0],
+             [draw_blaze, 11],
+             [partial(scene_change, enum=Idx.ATTACK), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_battle_end(): # 戦闘終了
     global idx, tmr
