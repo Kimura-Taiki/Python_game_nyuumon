@@ -437,35 +437,25 @@ def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
                 cmd[1]()
 
 def scene_attack(): # プレイヤーの攻撃
-    # global idx, tmr, dmg, emy_blink, emy_life
     global scene_steps
     draw_battle(screen, fontS)
-    # if tmr == 1:
     def slash():
         global dmg
         set_message("You attack!")
         se[0].play()
         dmg = pl_str + random.randint(0, 9)
-    # if 2 <= tmr and tmr <= 4:
     def shake_bg():
         screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
-    # if tmr == 5:
     def shake_enemy():
         global emy_blink
         emy_blink = 5
         set_message(str(dmg)+"pts of damage!")
-    # if tmr == 11:
     def settle_damage():
         global emy_life
         emy_life -= dmg
         if emy_life <= 0:
             emy_life = 0
             scene_change(Idx.WIN)
-    #         idx = Idx.WIN
-    #         tmr = 0
-    # if tmr == 16:
-    #     idx = Idx.ENEMY_TURN
-    #     tmr = 0
     steps = [[slash, 0],
              [shake_bg, 5],
              [shake_enemy, 0],
@@ -476,28 +466,46 @@ def scene_attack(): # プレイヤーの攻撃
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_enemy_turn(): # 敵のターン、敵の攻撃
-    global idx, tmr, emy_step, dmg, dmg_eff, pl_life
+    # global idx, tmr, emy_step, dmg, dmg_eff, pl_life
+    global scene_steps
     draw_battle(screen, fontS)
-    if tmr == 1:
-        set_message("Enemy turn.")
-    if tmr == 5:
+    # if tmr == 1:
+    #     set_message("Enemy turn.")
+    # if tmr == 5:
+    def enter_enemy():
+        global emy_step
         set_message(emy_name + " attack!")
         se[0].play()
         emy_step = 30
-    if tmr == 9:
+    # if tmr == 9:
+    def shake_protag():
+        global dmg_eff, emy_step
         dmg = emy_str + random.randint(0, 9)
         set_message(str(dmg)+"pts of damage!")
         dmg_eff = 5
         emy_step = 0
-    if tmr == 15:
+    # if tmr == 15:
+    def settle_damage():
+        global pl_life
         pl_life -= dmg
         if pl_life < 0:
             pl_life = 0
-            idx = Idx.LOSE
-            tmr = 0
-    if tmr == 20:
-        idx = Idx.BATTLE_WFI
-        tmr = 0
+            scene_change(Idx.LOSE)
+            # idx = Idx.LOSE
+            # tmr = 0
+    # if tmr == 20:
+    #     idx = Idx.BATTLE_WFI
+    #     tmr = 0
+    steps = [[partial(set_message,msg="Enemy turn."), 0],
+             [pass_method, 5],
+             [enter_enemy, 0],
+             [pass_method, 4],
+             [shake_protag, 0],
+             [pass_method, 6],
+             [settle_damage, 0],
+             [pass_method, 5],
+             [partial(scene_change, enum=Idx.BATTLE_WFI), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_escape(): # 逃げられる？
     global idx, tmr
