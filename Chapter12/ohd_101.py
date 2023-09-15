@@ -544,27 +544,21 @@ def scene_win(): # 勝利
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_level_up(): # レベルアップ
-    # global idx, tmr, pl_lifemax, pl_str
     global scene_steps
     draw_battle(screen, fontS)
-    # if tmr == 1:
     def level_up():
         set_message("Level up!")
         se[4].play()
-    # if tmr == 21:
     def max_life_plus():
         global pl_lifemax
         lif_p = random.randint(10, 20)
         set_message("Max life + "+str(lif_p))
         pl_lifemax += lif_p
-    # if tmr == 26:
     def str_plus():
         global pl_str
         str_p = random.randint(5, 10)
         set_message("Str + "+str(str_p))
         pl_str += str_p
-    # if tmr == 50:
-    #     idx = Idx.BATTLE_END
     steps = [[level_up, 0],
              [pass_method, 20],
              [max_life_plus, 0],
@@ -575,21 +569,32 @@ def scene_level_up(): # レベルアップ
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_potion(): # Potion
-    global idx, tmr, pl_life, potion
+    # global idx, tmr, pl_life, potion
+    global scene_steps
     draw_battle(screen, fontS)
-    if tmr == 1:
+    # if tmr == 1:
+    def has_potion():
+        global potion
         if potion == 0:
             set_message("No Potion.")
             scene_change(enum=Idx.BATTLE_WFI)
             return
         set_message("Potion!")
         se[2].play()
-    if tmr == 6:
+    # if tmr == 6:
+    def full_recovery():
+        global pl_life, potion
         pl_life = pl_lifemax
         potion -= 1
-    if tmr == 11:
-        idx = Idx.ENEMY_TURN
-        tmr = 0
+    # if tmr == 11:
+    #     idx = Idx.ENEMY_TURN
+    #     tmr = 0
+    steps = [[has_potion, 0],
+             [pass_method, 6],
+             [full_recovery, 0],
+             [pass_method, 5],
+             [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_blaze_gem(): # Blaze gem
     global idx, tmr, blazegem, dmg
