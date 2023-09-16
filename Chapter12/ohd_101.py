@@ -613,6 +613,11 @@ def scene_attack(): # プレイヤーの攻撃
     draw_battle(screen, fontS)
     scene_steps = step_by_step(attack_schedule, scene_steps, speed)
 
+def scene_in_battle(schedule): # バトル中のstep_by_step系シーンを一本化
+    global scene_steps
+    draw_battle(screen, fontS)
+    scene_steps = step_by_step(schedule, scene_steps, speed)
+
 def scene_damaged_enemy(): # 敵の被弾
     global scene_steps
     draw_battle(screen, fontS)
@@ -642,7 +647,8 @@ scenes[Idx.ON_ITEM] = scene_on_item
 scenes[Idx.GAME_OVER] = scene_game_over
 scenes[Idx.ON_ENEMY] = scene_on_enemy
 scenes[Idx.BATTLE_WFI] = scene_battle_wfi
-scenes[Idx.ATTACK] = scene_attack
+# scenes[Idx.ATTACK] = scene_attack
+scenes[Idx.ATTACK] = partial(scene_in_battle, schedule=attack_schedule)
 scenes[Idx.ENEMY_TURN] = scene_enemy_turn
 scenes[Idx.ESCAPE] = scene_escape
 scenes[Idx.LOSE] = scene_lose
