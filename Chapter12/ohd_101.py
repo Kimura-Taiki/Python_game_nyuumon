@@ -321,9 +321,7 @@ def scene_field_wfi(): # プレイヤーの移動
         draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
 
 scene_steps = 0
-# resolved_stairs_steps = 0
 def scene_on_stairs(): # 画面切り替え
-    # global screen, fontS, tmr, resolved_stairs_steps, speed
     global scene_steps
     def close_curtain():
         global tmr, screen
@@ -370,9 +368,7 @@ def step_by_step(steps, resolved, spd=1):
                 return 0
             return ((resolved+1)%len(steps)) if i >= resolved else resolved
 
-# get_item_steps = 0
 def scene_on_item(): # アイテム入手もしくはトラップ
-    # global idx, get_item_steps
     global scene_steps
     def draw_get_item():
         draw_dungeon(screen, fontS)
@@ -547,7 +543,7 @@ def scene_blaze_gem(): # Blaze gem
     draw_battle(screen, fontS)
     def has_blaze_gem():
         global blazegem, dmg
-        if blazegem == 100:
+        if blazegem == 0:
             set_message("No Blaze Gem.")
             scene_change(enum=Idx.BATTLE_WFI)
             return
@@ -599,17 +595,19 @@ def scene_game_over(): # ゲームオーバー
              [partial(scene_change, enum=Idx.TITLE), 0]]
     scene_steps = step_by_step(steps, scene_steps, speed)
 
+def protag_slash():
+    global dmg
+    set_message("You attack!")
+    se[0].play()
+    dmg = pl_str + random.randint(0, 9)
+
+def shake_bg():
+    screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
+
 def scene_attack(): # プレイヤーの攻撃
     global scene_steps
     draw_battle(screen, fontS)
-    def slash():
-        global dmg
-        set_message("You attack!")
-        se[0].play()
-        dmg = pl_str + random.randint(0, 9)
-    def shake_bg():
-        screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
-    steps = [[slash, 0],
+    steps = [[protag_slash, 0],
              [shake_bg, 5],
              [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
     scene_steps = step_by_step(steps, scene_steps, speed)
