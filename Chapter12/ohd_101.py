@@ -415,152 +415,178 @@ def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
             if btl_cmd == cmd[0]:
                 cmd[1]()
 
-def scene_enemy_turn(): # 敵のターン、敵の攻撃
-    global scene_steps
-    draw_battle(screen, fontS)
-    def enter_enemy():
-        global emy_step
-        set_message(emy_name + " attack!")
-        se[0].play()
-        emy_step = 30
-    def shake_protag():
-        global dmg, dmg_eff, emy_step
-        dmg = emy_str + random.randint(0, 9)
-        set_message(str(dmg)+"pts of damage!")
-        dmg_eff = 5
-        emy_step = 0
-    def settle_damage():
-        global pl_life
-        pl_life -= dmg
-        if pl_life < 0:
-            pl_life = 0
-            scene_change(Idx.LOSE)
-    steps = [[partial(set_message,msg="Enemy turn."), 0],
-             [pass_method, 5],
-             [enter_enemy, 0],
-             [pass_method, 4],
-             [shake_protag, 0],
-             [pass_method, 6],
-             [settle_damage, 0],
-             [pass_method, 5],
-             [partial(scene_change, enum=Idx.BATTLE_WFI), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+# def scene_enemy_turn(): # 敵のターン、敵の攻撃
+#     global scene_steps
+#     draw_battle(screen, fontS)
+#     scene_steps = step_by_step(steps, scene_steps, speed)
 
-def scene_escape(): # 逃げられる？
-    global scene_steps
-    draw_battle(screen, fontS)
-    def escape_judgement():
-        if random.randint(0, 99) < 60:
-            scene_change(Idx.BATTLE_END)
-        else:
-            set_message("You failed to flee.")
-    steps = [[partial(set_message, msg="…"), 1],
-             [partial(set_message, msg="……"), 1],
-             [partial(set_message, msg="………"), 1],
-             [partial(set_message, msg="…………"), 1],
-             [escape_judgement, 0],
-             [pass_method, 6],
-             [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+# Idx.ENEMY_TURN系統(敵のターン、敵の攻撃)の工程メソッド
+def enter_enemy():
+    global emy_step
+    set_message(emy_name + " attack!")
+    se[0].play()
+    emy_step = 30
 
-def scene_lose(): # 敗北
-    global scene_steps
-    draw_battle(screen, fontS)
-    def you_lose():
-        pygame.mixer.music.stop()
-        set_message("You lose.")
-    steps = [[you_lose, 0],
-             [pass_method, 12],
-             [partial(scene_change, enum=Idx.GAME_OVER), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+def shake_protag():
+    global dmg, dmg_eff, emy_step
+    dmg = emy_str + random.randint(0, 9)
+    set_message(str(dmg)+"pts of damage!")
+    dmg_eff = 5
+    emy_step = 0
 
-def scene_win(): # 勝利
-    global scene_steps
-    draw_battle(screen, fontS)
-    def you_win():
-        set_message("you win!")
-        pygame.mixer.music.stop()
-        se[5].play()
-    def win_end():
-        if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
-            scene_change(Idx.LEVEL_UP)
-        else:
-            scene_change(Idx.BATTLE_END)
-    steps = [[you_win, 0],
-             [pass_method, 28],
-             [win_end, 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+def settle_damage():
+    global pl_life
+    pl_life -= dmg
+    if pl_life < 0:
+        pl_life = 0
+        scene_change(Idx.LOSE)
 
-def scene_level_up(): # レベルアップ
-    global scene_steps
-    draw_battle(screen, fontS)
-    def level_up():
-        set_message("Level up!")
-        se[4].play()
-    def max_life_plus():
-        global pl_lifemax
-        lif_p = random.randint(10, 20)
-        set_message("Max life + "+str(lif_p))
-        pl_lifemax += lif_p
-    def str_plus():
-        global pl_str
-        str_p = random.randint(5, 10)
-        set_message("Str + "+str(str_p))
-        pl_str += str_p
-    steps = [[level_up, 0],
-             [pass_method, 20],
-             [max_life_plus, 0],
-             [pass_method, 5],
-             [str_plus, 0],
-             [pass_method, 25],
-             [partial(scene_change, enum=Idx.BATTLE_END), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+enemy_turn_schedule = [[partial(set_message,msg="Enemy turn."), 0],
+                       [pass_method, 5],
+                       [enter_enemy, 0],
+                       [pass_method, 4],
+                       [shake_protag, 0],
+                       [pass_method, 6],
+                       [settle_damage, 0],
+                       [pass_method, 5],
+                       [partial(scene_change, enum=Idx.BATTLE_WFI), 0]]
 
-def scene_potion(): # Potion
-    global scene_steps
-    draw_battle(screen, fontS)
-    def has_potion():
-        global potion
-        if potion == 0:
-            set_message("No Potion.")
-            scene_change(enum=Idx.BATTLE_WFI)
-            return
-        set_message("Potion!")
-        se[2].play()
-    def full_recovery():
-        global pl_life, potion
-        pl_life = pl_lifemax
-        potion -= 1
-    steps = [[has_potion, 0],
-             [pass_method, 6],
-             [full_recovery, 0],
-             [pass_method, 5],
-             [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+# def scene_escape(): # 逃げられる？
+#     global scene_steps
+#     draw_battle(screen, fontS)
+#     scene_steps = step_by_step(steps, scene_steps, speed)
 
-def scene_blaze_gem(): # Blaze gem
-    global scene_steps
-    draw_battle(screen, fontS)
-    def has_blaze_gem():
-        global blazegem, dmg
-        if blazegem == 0:
-            set_message("No Blaze Gem.")
-            scene_change(enum=Idx.BATTLE_WFI)
-            return
-        set_message("Blaze gem!")
-        se[1].play()
-        draw_blaze()
-        blazegem -= 1
-        dmg = 1000
-    def draw_blaze():
-        img_rz = pygame.transform.rotozoom(imgEffect[1], 30*tmr, (12-tmr)/8)
-        X = 440-img_rz.get_width()/2
-        Y = 360-img_rz.get_height()/2
-        screen.blit(img_rz, [X, Y])
-    steps = [[has_blaze_gem, 0],
-             [draw_blaze, 11],
-             [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+# Idx.ESCAPE系統(逃げられる？)の工程メソッド
+def escape_judgement():
+    if random.randint(0, 99) < 60:
+        scene_change(Idx.BATTLE_END)
+    else:
+        set_message("You failed to flee.")
+
+escape_schedule = [[partial(set_message, msg="…"), 1],
+                   [partial(set_message, msg="……"), 1],
+                   [partial(set_message, msg="………"), 1],
+                   [partial(set_message, msg="…………"), 1],
+                   [escape_judgement, 0],
+                   [pass_method, 6],
+                   [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
+
+# def scene_lose(): # 敗北
+#     global scene_steps
+#     draw_battle(screen, fontS)
+#     scene_steps = step_by_step(steps, scene_steps, speed)
+
+# Idx.LOSE系統(敗北)の工程メソッド
+def you_lose():
+    pygame.mixer.music.stop()
+    set_message("You lose.")
+
+lose_schedule = [[you_lose, 0],
+                 [pass_method, 12],
+                 [partial(scene_change, enum=Idx.GAME_OVER), 0]]
+
+# def scene_win(): # 勝利
+#     global scene_steps
+#     draw_battle(screen, fontS)
+#     scene_steps = step_by_step(steps, scene_steps, speed)
+
+# Idx.WIN系統(勝利)の工程メソッド
+def you_win():
+    set_message("you win!")
+    pygame.mixer.music.stop()
+    se[5].play()
+
+def win_end():
+    if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
+        scene_change(Idx.LEVEL_UP)
+    else:
+        scene_change(Idx.BATTLE_END)
+
+win_schedule = [[you_win, 0],
+                [pass_method, 28],
+                [win_end, 0]]
+
+# def scene_level_up(): # レベルアップ
+#     global scene_steps
+#     draw_battle(screen, fontS)
+#     scene_steps = step_by_step(steps, scene_steps, speed)
+
+# Idx.LEVEL_UP系統(レベルアップ)の工程メソッド
+def level_up():
+    set_message("Level up!")
+    se[4].play()
+
+def max_life_plus():
+    global pl_lifemax
+    lif_p = random.randint(10, 20)
+    set_message("Max life + "+str(lif_p))
+    pl_lifemax += lif_p
+
+def str_plus():
+    global pl_str
+    str_p = random.randint(5, 10)
+    set_message("Str + "+str(str_p))
+    pl_str += str_p
+
+level_up_schedule = [[level_up, 0],
+                     [pass_method, 20],
+                     [max_life_plus, 0],
+                     [pass_method, 5],
+                     [str_plus, 0],
+                     [pass_method, 25],
+                     [partial(scene_change, enum=Idx.BATTLE_END), 0]]
+
+# Idx.POTION系統(Potion)の工程メソッド
+def has_potion():
+    global potion
+    if potion == 999: #改変中-----------------------------------------------------------------------------------------------------
+        set_message("No Potion.")
+        scene_change(enum=Idx.BATTLE_WFI)
+        return
+    set_message("Potion!")
+    se[2].play()
+
+def full_recovery():
+    global pl_life, potion
+    pl_life = pl_lifemax
+    potion -= 1
+
+potion_schedule = [[has_potion, 0],
+                   [pass_method, 6],
+                   [full_recovery, 0],
+                   [pass_method, 5],
+                   [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
+# def scene_potion(): # Potion
+#     global scene_steps
+#     draw_battle(screen, fontS)
+#     scene_steps = step_by_step(steps, scene_steps, speed)
+
+# Idx.BLAZE_GEM系統(Blaze gem)の工程メソッド
+def has_blaze_gem():
+    global blazegem, dmg
+    if blazegem == 999: #改変中-----------------------------------------------------------------------------------------------------
+        set_message("No Blaze Gem.")
+        scene_change(enum=Idx.BATTLE_WFI)
+        return
+    set_message("Blaze gem!")
+    se[1].play()
+    draw_blaze()
+    blazegem -= 1
+    dmg = 1000
+
+def draw_blaze():
+    img_rz = pygame.transform.rotozoom(imgEffect[1], 30*tmr, (12-tmr)/8)
+    X = 440-img_rz.get_width()/2
+    Y = 360-img_rz.get_height()/2
+    screen.blit(img_rz, [X, Y])
+
+blaze_gem_schedule = [[has_blaze_gem, 0],
+                      [draw_blaze, 11],
+                      [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
+# def scene_blaze_gem(): # Blaze gem
+#     global scene_steps
+#     draw_battle(screen, fontS)
+#     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_battle_end(): # 戦闘終了
     global idx, tmr
@@ -595,6 +621,7 @@ def scene_game_over(): # ゲームオーバー
              [partial(scene_change, enum=Idx.TITLE), 0]]
     scene_steps = step_by_step(steps, scene_steps, speed)
 
+# Idx.ATTACK系統(プレイヤーの攻撃)の工程メソッド
 def protag_slash():
     global dmg
     set_message("You attack!")
@@ -607,37 +634,38 @@ def shake_bg():
 attack_schedule = [[protag_slash, 0],
                    [shake_bg, 5],
                    [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
+# def scene_attack(): # プレイヤーの攻撃
+#     global scene_steps, attack_schedule
+#     draw_battle(screen, fontS)
+#     scene_steps = step_by_step(attack_schedule, scene_steps, speed)
 
-def scene_attack(): # プレイヤーの攻撃
-    global scene_steps, attack_schedule
-    draw_battle(screen, fontS)
-    scene_steps = step_by_step(attack_schedule, scene_steps, speed)
+# Idx.DAMAGED_ENEMY系統(敵の被弾)の工程メソッド
+def shake_enemy():
+    global emy_blink
+    emy_blink = 5
+    set_message(str(dmg)+"pts of damage!")
+
+def settle_damage():
+    global emy_life
+    emy_life -= dmg
+    if emy_life <= 0:
+        emy_life = 0
+        scene_change(Idx.WIN)
+
+damaged_enemy_schedule = [[shake_enemy, 0],
+                          [pass_method, 5],
+                          [settle_damage, 0],
+                          [pass_method, 5],
+                          [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
+# def scene_damaged_enemy(): # 敵の被弾
+#     global scene_steps
+#     draw_battle(screen, fontS)
+#     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_in_battle(schedule): # バトル中のstep_by_step系シーンを一本化
     global scene_steps
     draw_battle(screen, fontS)
     scene_steps = step_by_step(schedule, scene_steps, speed)
-
-def scene_damaged_enemy(): # 敵の被弾
-    global scene_steps
-    draw_battle(screen, fontS)
-    def shake_enemy():
-        global emy_blink
-        emy_blink = 5
-        set_message(str(dmg)+"pts of damage!")
-    def settle_damage():
-        global emy_life
-        emy_life -= dmg
-        if emy_life <= 0:
-            emy_life = 0
-            scene_change(Idx.WIN)
-    steps = [[shake_enemy, 0],
-             [pass_method, 5],
-             [settle_damage, 0],
-             [pass_method, 5],
-             [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
-
 
 scenes = {}
 scenes[Idx.TITLE] = scene_title
@@ -649,16 +677,24 @@ scenes[Idx.ON_ENEMY] = scene_on_enemy
 scenes[Idx.BATTLE_WFI] = scene_battle_wfi
 # scenes[Idx.ATTACK] = scene_attack
 scenes[Idx.ATTACK] = partial(scene_in_battle, schedule=attack_schedule)
-scenes[Idx.ENEMY_TURN] = scene_enemy_turn
-scenes[Idx.ESCAPE] = scene_escape
-scenes[Idx.LOSE] = scene_lose
-scenes[Idx.WIN] = scene_win
-scenes[Idx.LEVEL_UP] = scene_level_up
-scenes[Idx.POTION] = scene_potion
-scenes[Idx.BLAZE_GEM] = scene_blaze_gem
+# scenes[Idx.ENEMY_TURN] = scene_enemy_turn
+scenes[Idx.ENEMY_TURN] = partial(scene_in_battle, schedule=enemy_turn_schedule)
+# scenes[Idx.ESCAPE] = scene_escape
+scenes[Idx.ESCAPE] = partial(scene_in_battle, schedule=escape_schedule)
+# scenes[Idx.LOSE] = scene_lose
+scenes[Idx.LOSE] = partial(scene_in_battle, schedule=lose_schedule)
+# scenes[Idx.WIN] = scene_win
+scenes[Idx.WIN] = partial(scene_in_battle, schedule=win_schedule)
+# scenes[Idx.LEVEL_UP] = scene_level_up
+scenes[Idx.LEVEL_UP] = partial(scene_in_battle, schedule=level_up_schedule)
+# scenes[Idx.POTION] = scene_potion
+scenes[Idx.POTION] = partial(scene_in_battle, schedule=potion_schedule)
+# scenes[Idx.BLAZE_GEM] = scene_blaze_gem
+scenes[Idx.BLAZE_GEM] = partial(scene_in_battle, schedule=blaze_gem_schedule)
 scenes[Idx.BATTLE_END] = scene_battle_end
 scenes[Idx.FALLEN] = scene_fallen
-scenes[Idx.DAMAGED_ENEMY] = scene_damaged_enemy
+# scenes[Idx.DAMAGED_ENEMY] = scene_damaged_enemy
+scenes[Idx.DAMAGED_ENEMY] = partial(scene_in_battle, schedule=damaged_enemy_schedule)
 
 def main(): # メイン処理
     global key, idx, tmr, speed
