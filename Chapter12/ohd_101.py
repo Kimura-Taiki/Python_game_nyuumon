@@ -117,6 +117,7 @@ def put_protag(dgn): # 主人公をダンジョン上の空白地にランダム
     dungeon[pl_y-1][pl_x] = 2
     dungeon[pl_y][pl_x-1] = 1
     dungeon[pl_y][pl_x+1] = 1
+    dungeon[pl_y+1][pl_x] = 3
 
 def move_player(key): # 主人公の移動
     global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
@@ -319,9 +320,11 @@ def scene_field_wfi(): # プレイヤーの移動
         welcome -= 1
         draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
 
-resolved_stairs_steps = 0
+scene_steps = 0
+# resolved_stairs_steps = 0
 def scene_on_stairs(): # 画面切り替え
-    global screen, fontS, tmr, resolved_stairs_steps, speed
+    # global screen, fontS, tmr, resolved_stairs_steps, speed
+    global scene_steps
     def close_curtain():
         global tmr, screen
         h = 80*tmr
@@ -346,7 +349,7 @@ def scene_on_stairs(): # 画面切り替え
              [make_new_dungeon, 0],
              [open_curtain, 5],
              [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
-    resolved_stairs_steps = step_by_step(steps, resolved_stairs_steps, speed)
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_change(enum):
     global idx, tmr
@@ -367,42 +370,20 @@ def step_by_step(steps, resolved, spd=1):
                 return 0
             return ((resolved+1)%len(steps)) if i >= resolved else resolved
 
-get_item_steps = 0
+# get_item_steps = 0
 def scene_on_item(): # アイテム入手もしくはトラップ
-    global idx, get_item_steps
+    # global idx, get_item_steps
+    global scene_steps
     def draw_get_item():
         draw_dungeon(screen, fontS)
         screen.blit(imgItem[treasure], [320, 220])
         draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
     steps = [[draw_get_item, 10],
              [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
-    get_item_steps = step_by_step(steps, get_item_steps, speed)
+    scene_steps = step_by_step(steps, scene_steps, speed)
 
 def pass_method():
     return
-
-scene_steps = 0
-# def scene_game_over(): # ゲームオーバー
-#     global idx, tmr, pl_a, scene_steps
-#     def staggered():
-#         global pl_a
-#         PL_TURN = [2, 4, 0, 6]
-#         pl_a = PL_TURN[tmr%4]
-#         draw_dungeon(screen, fontS)
-#     def fallen():
-#         global pl_a
-#         pl_a = 8
-#         draw_dungeon(screen, fontS)
-#     def you_died():
-#         se[3].play()
-#         draw_text(screen, "You died.", 360, 240, font, RED)
-#         draw_text(screen, "Game over.", 360, 380, font, RED)
-#     steps = [[staggered, 28],
-#              [fallen, 0],
-#              [you_died, 0],
-#              [pass_method, 70],
-#              [partial(scene_change, enum=Idx.TITLE), 0]]
-#     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_on_enemy(): # 戦闘準備
     global scene_steps
@@ -437,35 +418,6 @@ def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
         for cmd in cmd_list:
             if btl_cmd == cmd[0]:
                 cmd[1]()
-
-# def scene_attack(): # プレイヤーの攻撃
-#     global scene_steps
-#     draw_battle(screen, fontS)
-#     def slash():
-#         global dmg
-#         set_message("You attack!")
-#         se[0].play()
-#         dmg = pl_str + random.randint(0, 9)
-#     def shake_bg():
-#         screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
-#     def shake_enemy():
-#         global emy_blink
-#         emy_blink = 5
-#         set_message(str(dmg)+"pts of damage!")
-#     def settle_damage():
-#         global emy_life
-#         emy_life -= dmg
-#         if emy_life <= 0:
-#             emy_life = 0
-#             scene_change(Idx.WIN)
-#     steps = [[slash, 0],
-#              [shake_bg, 5],
-#              [shake_enemy, 0],
-#              [pass_method, 5],
-#              [settle_damage, 0],
-#              [pass_method, 5],
-#              [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
-#     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_enemy_turn(): # 敵のターン、敵の攻撃
     global scene_steps
@@ -591,10 +543,8 @@ def scene_potion(): # Potion
     scene_steps = step_by_step(steps, scene_steps, speed)
 
 def scene_blaze_gem(): # Blaze gem
-    # global idx, tmr, blazegem, dmg
     global scene_steps
     draw_battle(screen, fontS)
-    # if (tmr == 1) and (blazegem == 0):
     def has_blaze_gem():
         global blazegem, dmg
         if blazegem == 100:
@@ -611,16 +561,6 @@ def scene_blaze_gem(): # Blaze gem
         X = 440-img_rz.get_width()/2
         Y = 360-img_rz.get_height()/2
         screen.blit(img_rz, [X, Y])
-    # if tmr == 1:
-    # if tmr == 6:
-    # def use_blaze()
-    #     global blazegem, dmg
-    #     draw_blaze(6)
-    #     blazegem -= 1
-    #     dmg = 1000
-    # if tmr == 11:
-        # idx = Idx.ATTACK
-        # tmr = 4
     steps = [[has_blaze_gem, 0],
              [draw_blaze, 11],
              [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
