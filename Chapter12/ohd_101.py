@@ -604,13 +604,14 @@ def protag_slash():
 def shake_bg():
     screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
 
+attack_schedule = [[protag_slash, 0],
+                   [shake_bg, 5],
+                   [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
+
 def scene_attack(): # プレイヤーの攻撃
-    global scene_steps
+    global scene_steps, attack_schedule
     draw_battle(screen, fontS)
-    steps = [[protag_slash, 0],
-             [shake_bg, 5],
-             [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+    scene_steps = step_by_step(attack_schedule, scene_steps, speed)
 
 def scene_damaged_enemy(): # 敵の被弾
     global scene_steps
