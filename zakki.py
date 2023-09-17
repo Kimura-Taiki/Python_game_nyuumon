@@ -23,6 +23,8 @@ class Nizi(Enum):
 for col in Nizi:
     print(col)
 
+# 参考サイト
+# https://www.sejuku.net/blog/24122
 gogyou = {}
 gogyou[Nizi.RED] = "朱雀"
 gogyou[Nizi.YELLOW] = "白虎"
