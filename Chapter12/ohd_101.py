@@ -282,6 +282,31 @@ def set_message(msg):
         message[i] = message[i+1]
     message[9] = msg
 
+# 共有処理
+scene_steps = 0
+
+def scene_change(enum):
+    global idx, tmr
+    idx = enum
+    tmr = 0
+
+def step_by_step(steps, resolved, spd=1):
+    global idx
+    now = tmr*spd
+    acc = 0
+    for i, step in enumerate(steps):
+        # print("now={}, acc={}, i={}, step={}".format(now, acc, i, step))
+        acc += step[1]
+        if (now < acc) or (i >= resolved):
+            past_idx = idx
+            step[0]()
+            if idx != past_idx:
+                return 0
+            return ((resolved+1)%len(steps)) if i >= resolved else resolved
+
+def pass_method():
+    return
+
 def scene_title(): # タイトル画面
     global screen, font, fontS, key
     global idx, tmr
@@ -320,87 +345,70 @@ def scene_field_wfi(): # プレイヤーの移動
         welcome -= 1
         draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
 
-scene_steps = 0
-def scene_on_stairs(): # 画面切り替え
-    global scene_steps
-    def close_curtain():
-        global tmr, screen
-        h = 80*tmr
-        pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
-        pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
-    def make_new_dungeon():
-        global floor, fl_max, welcome, dungeon
-        pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
-        floor += 1
-        if floor > fl_max:
-            fl_max = floor
-        welcome = 15
-        dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
-        put_protag(dungeon)
-    def open_curtain():
-        global tmr, screen
-        h = 80*(10-tmr)
-        pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
-        pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
+# def scene_on_stairs(): # 画面切り替え
+#     global scene_steps
+    # draw_dungeon(screen, fontS)
+#     scene_steps = step_by_step(steps, scene_steps, speed)
+# Idx.ON_STAIRS系統(画面切り替え)の工程メソッド
+def close_curtain():
+    global tmr, screen
     draw_dungeon(screen, fontS)
-    steps = [[close_curtain, 5],
-             [make_new_dungeon, 0],
-             [open_curtain, 5],
-             [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+    h = 80*tmr
+    pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
+    pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
+def make_new_dungeon():
+    global floor, fl_max, welcome, dungeon
+    draw_dungeon(screen, fontS)
+    pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
+    floor += 1
+    if floor > fl_max:
+        fl_max = floor
+    welcome = 15
+    dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
+    put_protag(dungeon)
+def open_curtain():
+    global tmr, screen
+    draw_dungeon(screen, fontS)
+    h = 80*(10-tmr)
+    pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
+    pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
+on_stairs_schedule = [[close_curtain, 5],
+                      [make_new_dungeon, 0],
+                      [open_curtain, 5],
+                      [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
 
-def scene_change(enum):
-    global idx, tmr
-    idx = enum
-    tmr = 0
+# def scene_on_item(): # アイテム入手もしくはトラップ
+#     global scene_steps
+#     scene_steps = step_by_step(steps, scene_steps, speed)
+# Idx.ON_ITEM系統(アイテム入手もしくはトラップ)の工程メソッド
+def draw_get_item():
+    draw_dungeon(screen, fontS)
+    screen.blit(imgItem[treasure], [320, 220])
+    draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
+on_item_schedule = [[draw_get_item, 10],
+                    [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
 
-def step_by_step(steps, resolved, spd=1):
-    global idx
-    now = tmr*spd
-    acc = 0
-    for i, step in enumerate(steps):
-        # print("now={}, acc={}, i={}, step={}".format(now, acc, i, step))
-        acc += step[1]
-        if (now < acc) or (i >= resolved):
-            past_idx = idx
-            step[0]()
-            if idx != past_idx:
-                return 0
-            return ((resolved+1)%len(steps)) if i >= resolved else resolved
-
-def scene_on_item(): # アイテム入手もしくはトラップ
-    global scene_steps
-    def draw_get_item():
-        draw_dungeon(screen, fontS)
-        screen.blit(imgItem[treasure], [320, 220])
-        draw_text(screen, TRE_NAME[treasure], 380, 240, font, WHITE)
-    steps = [[draw_get_item, 10],
-             [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
-
-def pass_method():
-    return
-
-def scene_on_enemy(): # 戦闘準備
-    global scene_steps
-    def battle_start():
-        pygame.mixer.music.load("Chapter12/sound/ohd_bgm_battle.ogg")
-        pygame.mixer.music.play(-1)
-        init_battle()
-        init_message()
-    def encounter():
-        bx = (4-tmr)*220
-        by = 0
-        screen.blit(imgBtlBG, [bx, by])
-        draw_text(screen, "Encounter!", 350, 200, font, WHITE)
-    def enemy_appear():
-        draw_battle(screen, fontS)
-        draw_text(screen, emy_name+" appear!", 300, 200, font, WHITE)
-    steps = [[battle_start, 0],
-             [encounter, 4],
-             [enemy_appear, 12],
-             [partial(scene_change, enum=Idx.BATTLE_WFI), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+# def scene_on_enemy(): # 戦闘準備
+#     global scene_steps
+#     scene_steps = step_by_step(steps, scene_steps, speed)
+# Idx.ON_ENEMY系統(戦闘準備)の工程メソッド
+def battle_start():
+    pygame.mixer.music.load("Chapter12/sound/ohd_bgm_battle.ogg")
+    pygame.mixer.music.play(-1)
+    init_battle()
+    init_message()
+def encounter():
+    bx = (4-tmr)*220
+    by = 0
+    screen.blit(imgBtlBG, [bx, by])
+    draw_text(screen, "Encounter!", 350, 200, font, WHITE)
+def enemy_appear():
+    draw_battle(screen, fontS)
+    draw_text(screen, emy_name+" appear!", 300, 200, font, WHITE)
+on_enemy_schedule = [[battle_start, 0],
+                     [encounter, 4],
+                     [enemy_appear, 12],
+                     [partial(scene_change, enum=Idx.BATTLE_WFI), 0]]
 
 def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
     global idx, tmr
@@ -547,32 +555,34 @@ def scene_battle_end(): # 戦闘終了
     pygame.mixer.music.play(-1)
     idx = Idx.FIELD_WFI
 
-def scene_fallen(): # フィールド上でよろめいて倒れる
-    global scene_steps
-    def staggered():
-        global pl_a
-        PL_TURN = [2, 4, 0, 6]
-        pl_a = PL_TURN[tmr%4]
-        draw_dungeon(screen, fontS)
-    def fallen():
-        global pl_a
-        pl_a = 8
-        draw_dungeon(screen, fontS)
-    steps = [[staggered, 28],
-             [fallen, 0],
-             [partial(scene_change, enum=Idx.GAME_OVER), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+# def scene_fallen(): # フィールド上でよろめいて倒れる
+#     global scene_steps
+#     scene_steps = step_by_step(steps, scene_steps, speed)
+# Idx.FALLEN系統(フィールド上でよろめいて倒れる)の工程メソッド
+def staggered():
+    global pl_a
+    PL_TURN = [2, 4, 0, 6]
+    pl_a = PL_TURN[tmr%4]
+    draw_dungeon(screen, fontS)
+def fallen():
+    global pl_a
+    pl_a = 8
+    draw_dungeon(screen, fontS)
+fallen_schedule = [[staggered, 28],
+                   [fallen, 0],
+                   [partial(scene_change, enum=Idx.GAME_OVER), 0]]
 
-def scene_game_over(): # ゲームオーバー
-    global scene_steps
-    def you_died():
-        se[3].play()
-        draw_text(screen, "You died.", 360, 240, font, RED)
-        draw_text(screen, "Game over.", 360, 380, font, RED)
-    steps = [[you_died, 0],
-             [pass_method, 70],
-             [partial(scene_change, enum=Idx.TITLE), 0]]
-    scene_steps = step_by_step(steps, scene_steps, speed)
+# def scene_game_over(): # ゲームオーバー
+#     global scene_steps
+#     scene_steps = step_by_step(steps, scene_steps, speed)
+# Idx.GAME_OVER系統(ゲームオーバー)の工程メソッド
+def you_died():
+    se[3].play()
+    draw_text(screen, "You died.", 360, 240, font, RED)
+    draw_text(screen, "Game over.", 360, 380, font, RED)
+game_over_schedule = [[you_died, 0],
+                      [pass_method, 70],
+                      [partial(scene_change, enum=Idx.TITLE), 0]]
 
 # Idx.ATTACK系統(プレイヤーの攻撃)の工程メソッド
 def protag_slash():
@@ -614,10 +624,14 @@ def scene_in_battle(schedule): # バトル中のstep_by_step系シーンを一�
 scenes = {}
 scenes[Idx.TITLE] = scene_title
 scenes[Idx.FIELD_WFI] = scene_field_wfi
-scenes[Idx.ON_STAIRS] = scene_on_stairs
-scenes[Idx.ON_ITEM] = scene_on_item
-scenes[Idx.GAME_OVER] = scene_game_over
-scenes[Idx.ON_ENEMY] = scene_on_enemy
+# scenes[Idx.ON_STAIRS] = scene_on_stairs
+# scenes[Idx.ON_ITEM] = scene_on_item
+# scenes[Idx.GAME_OVER] = scene_game_over
+# scenes[Idx.ON_ENEMY] = scene_on_enemy
+scenes[Idx.ON_STAIRS] = partial(scene_by_schedule, schedule=on_stairs_schedule)
+scenes[Idx.ON_ITEM] = partial(scene_by_schedule, schedule=on_item_schedule)
+scenes[Idx.GAME_OVER] = partial(scene_by_schedule, schedule=game_over_schedule)
+scenes[Idx.ON_ENEMY] = partial(scene_by_schedule, schedule=on_enemy_schedule)
 scenes[Idx.BATTLE_WFI] = scene_battle_wfi
 scenes[Idx.ATTACK] = partial(scene_in_battle, schedule=attack_schedule)
 scenes[Idx.ENEMY_TURN] = partial(scene_in_battle, schedule=enemy_turn_schedule)
@@ -628,7 +642,8 @@ scenes[Idx.LEVEL_UP] = partial(scene_in_battle, schedule=level_up_schedule)
 scenes[Idx.POTION] = partial(scene_in_battle, schedule=potion_schedule)
 scenes[Idx.BLAZE_GEM] = partial(scene_in_battle, schedule=blaze_gem_schedule)
 scenes[Idx.BATTLE_END] = scene_battle_end
-scenes[Idx.FALLEN] = scene_fallen
+# scenes[Idx.FALLEN] = scene_fallen
+scenes[Idx.FALLEN] = partial(scene_by_schedule, schedule=fallen_schedule)
 scenes[Idx.DAMAGED_ENEMY] = partial(scene_in_battle, schedule=damaged_enemy_schedule)
 
 def main(): # メイン処理
