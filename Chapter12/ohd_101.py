@@ -345,10 +345,6 @@ def scene_field_wfi(): # プレイヤーの移動
         welcome -= 1
         draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
 
-# def scene_on_stairs(): # 画面切り替え
-#     global scene_steps
-    # draw_dungeon(screen, fontS)
-#     scene_steps = step_by_step(steps, scene_steps, speed)
 # Idx.ON_STAIRS系統(画面切り替え)の工程メソッド
 def close_curtain():
     global tmr, screen
@@ -377,9 +373,6 @@ on_stairs_schedule = [[close_curtain, 5],
                       [open_curtain, 5],
                       [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
 
-# def scene_on_item(): # アイテム入手もしくはトラップ
-#     global scene_steps
-#     scene_steps = step_by_step(steps, scene_steps, speed)
 # Idx.ON_ITEM系統(アイテム入手もしくはトラップ)の工程メソッド
 def draw_get_item():
     draw_dungeon(screen, fontS)
@@ -388,9 +381,6 @@ def draw_get_item():
 on_item_schedule = [[draw_get_item, 10],
                     [partial(scene_change, enum=Idx.FIELD_WFI), 0]]
 
-# def scene_on_enemy(): # 戦闘準備
-#     global scene_steps
-#     scene_steps = step_by_step(steps, scene_steps, speed)
 # Idx.ON_ENEMY系統(戦闘準備)の工程メソッド
 def battle_start():
     pygame.mixer.music.load("Chapter12/sound/ohd_bgm_battle.ogg")
@@ -555,9 +545,6 @@ def scene_battle_end(): # 戦闘終了
     pygame.mixer.music.play(-1)
     idx = Idx.FIELD_WFI
 
-# def scene_fallen(): # フィールド上でよろめいて倒れる
-#     global scene_steps
-#     scene_steps = step_by_step(steps, scene_steps, speed)
 # Idx.FALLEN系統(フィールド上でよろめいて倒れる)の工程メソッド
 def staggered():
     global pl_a
@@ -572,9 +559,6 @@ fallen_schedule = [[staggered, 28],
                    [fallen, 0],
                    [partial(scene_change, enum=Idx.GAME_OVER), 0]]
 
-# def scene_game_over(): # ゲームオーバー
-#     global scene_steps
-#     scene_steps = step_by_step(steps, scene_steps, speed)
 # Idx.GAME_OVER系統(ゲームオーバー)の工程メソッド
 def you_died():
     se[3].play()
@@ -624,10 +608,6 @@ def scene_in_battle(schedule): # バトル中のstep_by_step系シーンを一�
 scenes = {}
 scenes[Idx.TITLE] = scene_title
 scenes[Idx.FIELD_WFI] = scene_field_wfi
-# scenes[Idx.ON_STAIRS] = scene_on_stairs
-# scenes[Idx.ON_ITEM] = scene_on_item
-# scenes[Idx.GAME_OVER] = scene_game_over
-# scenes[Idx.ON_ENEMY] = scene_on_enemy
 scenes[Idx.ON_STAIRS] = partial(scene_by_schedule, schedule=on_stairs_schedule)
 scenes[Idx.ON_ITEM] = partial(scene_by_schedule, schedule=on_item_schedule)
 scenes[Idx.GAME_OVER] = partial(scene_by_schedule, schedule=game_over_schedule)
@@ -642,7 +622,6 @@ scenes[Idx.LEVEL_UP] = partial(scene_in_battle, schedule=level_up_schedule)
 scenes[Idx.POTION] = partial(scene_in_battle, schedule=potion_schedule)
 scenes[Idx.BLAZE_GEM] = partial(scene_in_battle, schedule=blaze_gem_schedule)
 scenes[Idx.BATTLE_END] = scene_battle_end
-# scenes[Idx.FALLEN] = scene_fallen
 scenes[Idx.FALLEN] = partial(scene_by_schedule, schedule=fallen_schedule)
 scenes[Idx.DAMAGED_ENEMY] = partial(scene_in_battle, schedule=damaged_enemy_schedule)
 
