@@ -28,33 +28,34 @@ def pipeline_each(data, fns):
 scene_steps = 0
 
 def scene_change(enum):
-    # global idx, tmr
-    # idx = enum
-    # tmr = 0
     global sv
     sv.idx = enum
     sv.tmr = 0
 
 def step_by_step(steps, resolved, spd=1):
-    # global idx
     global sv
-    # now = tmr*spd
     now = sv.tmr*spd
     acc = 0
     for i, step in enumerate(steps):
         # print("now={}, acc={}, i={}, step={}".format(now, acc, i, step))
         acc += step[1]
         if (now < acc) or (i >= resolved):
-            # past_idx = idx
             past_idx = sv.idx
             step[0]()
-            # if idx != past_idx:
             if sv.idx != past_idx:
                 return 0
             return ((resolved+1)%len(steps)) if i >= resolved else resolved
 
 def pass_method():
     return
+
+def scene_by_schedule(schedule): # step_by_stepによる処理を一本化
+    global scene_steps
+    scene_steps = step_by_step(schedule, scene_steps, speed)
+
+def scene_in_battle(schedule): # バトル中のstep_by_step系シーンを一本化
+    draw_battle(screen, fontS)
+    scene_by_schedule(schedule)
 
 # -------------------------------- 部分メソッド --------------------------------
 
@@ -155,17 +156,12 @@ def put_protag(dgn): # 主人公をダンジョン上の空白地にランダム
     dungeon[pl_y+1][pl_x] = 3
 
 def move_player(key): # 主人公の移動
-    # global idx, tmr, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
     global sv, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
-    # 乗ったイベントに応じてイベント発動
     def on_event(bool, chip, i, func):
-        # global dungeon, pl_x, pl_y, idx, tmr
         global dungeon, pl_x, pl_y, sv
         if dungeon[pl_y][pl_x] != chip: return bool
         dungeon[pl_y][pl_x] = 0
         func()
-        # idx = i
-        # tmr = 0
         scene_change(i)
         return True
     def on_treasure():
@@ -209,8 +205,6 @@ def move_player(key): # 主人公の移動
         food, pl_life = eat_food(food, pl_life, pl_lifemax)
         if pl_life <= 0:
             pygame.mixer.music.stop()
-            # idx = Idx.FALLEN
-            # tmr = 0
             scene_change(Idx.FALLEN)
 
 def eat_food(food, pl_life, pl_lifemax):
@@ -323,11 +317,9 @@ def set_message(msg):
 
 def scene_title(): # タイトル画面
     global screen, font, fontS, key
-    # global idx, tmr
     global sv
     global floor, welcome, pl_lifemax, pl_life, pl_str, food, potion, blazegem
     global dungeon
-    # if tmr == 1:
     if sv.tmr == 1:
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_title.ogg")
         pygame.mixer.music.play(-1)
@@ -347,8 +339,6 @@ def scene_title(): # タイトル画面
         food = 300
         potion = 0
         blazegem = 0
-        # idx = Idx.FIELD_WFI
-        # tmr = 0
         scene_change(Idx.FIELD_WFI)
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
         pygame.mixer_music.play(-1)
@@ -418,10 +408,8 @@ on_enemy_schedule = [[battle_start, 0],
                      [partial(scene_change, enum=Idx.BATTLE_WFI), 0]]
 
 def scene_battle_wfi(): # プレイヤーのターン(入力待ち)
-    # global idx, tmr
     global sv
     draw_battle(screen, fontS)
-    # if tmr == 1: set_message("Your turn.")
     if sv.tmr == 1: set_message("Your turn.")
     if battle_command(screen, font, key) == True:
         cmd_list = [[0, partial(scene_change, enum=Idx.ATTACK)],
@@ -559,11 +547,9 @@ blaze_gem_schedule = [[has_blaze_gem, 0],
                       [partial(scene_change, enum=Idx.DAMAGED_ENEMY), 0]]
 
 def scene_battle_end(): # 戦闘終了
-    # global idx, tmr
     global sv
     pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
     pygame.mixer.music.play(-1)
-    # idx = Idx.FIELD_WFI
     scene_change(Idx.FIELD_WFI)
 
 # Idx.FALLEN系統(フィールド上でよろめいて倒れる)の工程メソッド
@@ -618,14 +604,6 @@ damaged_enemy_schedule = [[shake_enemy, 0],
                           [pass_method, 5],
                           [partial(scene_change, enum=Idx.ENEMY_TURN), 0]]
 
-def scene_by_schedule(schedule): # step_by_stepによる処理を一本化
-    global scene_steps
-    scene_steps = step_by_step(schedule, scene_steps, speed)
-
-def scene_in_battle(schedule): # バトル中のstep_by_step系シーンを一本化
-    draw_battle(screen, fontS)
-    scene_by_schedule(schedule)
-
 scenes = {}
 scenes[Idx.TITLE] = scene_title
 scenes[Idx.FIELD_WFI] = scene_field_wfi
@@ -647,7 +625,6 @@ scenes[Idx.FALLEN] = partial(scene_by_schedule, schedule=fallen_schedule)
 scenes[Idx.DAMAGED_ENEMY] = partial(scene_in_battle, schedule=damaged_enemy_schedule)
 
 def main(): # メイン処理
-    # global key, idx, tmr, speed
     global key, sv, speed
 
     clock = pygame.time.Clock()
