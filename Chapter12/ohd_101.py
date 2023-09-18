@@ -22,32 +22,32 @@ DUNGEON_H = MAZE_H*3
 
 # -------------------------------- 共用メソッド --------------------------------
 
-def pipeline_each(data, fns):
-    return reduce(lambda a, x: x(a), fns, data)
+# def pipeline_each(data, fns):
+#     return reduce(lambda a, x: x(a), fns, data)
 
-scene_steps = 0
+# scene_steps = 0
 
-def scene_change(enum):
-    global sv
-    sv.idx = enum
-    sv.tmr = 0
+# def scene_change(enum):
+#     global sv
+#     sv.idx = enum
+#     sv.tmr = 0
 
-def step_by_step(steps, resolved, spd=1):
-    global sv
-    now = sv.tmr*spd
-    acc = 0
-    for i, step in enumerate(steps):
-        # print("now={}, acc={}, i={}, step={}".format(now, acc, i, step))
-        acc += step[1]
-        if (now < acc) or (i >= resolved):
-            past_idx = sv.idx
-            step[0]()
-            if sv.idx != past_idx:
-                return 0
-            return ((resolved+1)%len(steps)) if i >= resolved else resolved
+# def step_by_step(steps, resolved, spd=1):
+#     global sv
+#     now = sv.tmr*spd
+#     acc = 0
+#     for i, step in enumerate(steps):
+#         # print("now={}, acc={}, i={}, step={}".format(now, acc, i, step))
+#         acc += step[1]
+#         if (now < acc) or (i >= resolved):
+#             past_idx = sv.idx
+#             step[0]()
+#             if sv.idx != past_idx:
+#                 return 0
+#             return ((resolved+1)%len(steps)) if i >= resolved else resolved
 
-def pass_method():
-    return
+# def pass_method():
+#     return
 
 def scene_by_schedule(schedule): # step_by_stepによる処理を一本化
     global scene_steps

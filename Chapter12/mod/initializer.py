@@ -15,3 +15,6 @@ from .initialize.sound import se
 
 # 変数の宣言
 from .initialize.var import *
+
+# 共用メソッドの読み込み
+from .initialize.commethod import *
