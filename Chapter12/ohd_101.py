@@ -6,6 +6,8 @@ from pygame.locals import *
 
 # 色々な宣言をまとめてモジュール化
 from mod.initializer import *
+# from mod.scenes import field_wfi
+from mod.scenes.field_wfi import eat_food
 
 COMMAND = ["[A]ttack", "[P]otion", "[B]laze gem", "[R]un"]
 TRE_NAME = ["Potion", "Blaze gem", "Food spoiled.", "Food +20", "Food +100"]
@@ -21,33 +23,6 @@ DUNGEON_W = MAZE_W*3
 DUNGEON_H = MAZE_H*3
 
 # -------------------------------- 共用メソッド --------------------------------
-
-# def pipeline_each(data, fns):
-#     return reduce(lambda a, x: x(a), fns, data)
-
-# scene_steps = 0
-
-# def scene_change(enum):
-#     global sv
-#     sv.idx = enum
-#     sv.tmr = 0
-
-# def step_by_step(steps, resolved, spd=1):
-#     global sv
-#     now = sv.tmr*spd
-#     acc = 0
-#     for i, step in enumerate(steps):
-#         # print("now={}, acc={}, i={}, step={}".format(now, acc, i, step))
-#         acc += step[1]
-#         if (now < acc) or (i >= resolved):
-#             past_idx = sv.idx
-#             step[0]()
-#             if sv.idx != past_idx:
-#                 return 0
-#             return ((resolved+1)%len(steps)) if i >= resolved else resolved
-
-# def pass_method():
-#     return
 
 def scene_by_schedule(schedule): # step_by_stepによる処理を一本化
     global scene_steps
@@ -203,18 +178,19 @@ def move_player(key): # 主人公の移動
     if is_move == True: # 移動したら食料の量と体力を計算
         pl_a += tmr%2 # 移動したら足踏みのアニメーション
         food, pl_life = eat_food(food, pl_life, pl_lifemax)
+        # food, pl_life = field_wfi.eat_food(food, pl_life, pl_lifemax)
         if pl_life <= 0:
             pygame.mixer.music.stop()
             scene_change(Idx.FALLEN)
 
-def eat_food(food, pl_life, pl_lifemax):
-    # pl_life -= 100
-    if food > 0:
-        food -= 1
-        pl_life = pl_life+1 if pl_life<pl_lifemax else pl_lifemax
-    else:
-        pl_life = pl_life-5 if pl_life>5 else 0
-    return food, pl_life
+# def eat_food(food, pl_life, pl_lifemax):
+#     # pl_life -= 100
+#     if food > 0:
+#         food -= 1
+#         pl_life = pl_life+1 if pl_life<pl_lifemax else pl_lifemax
+#     else:
+#         pl_life = pl_life-5 if pl_life>5 else 0
+#     return food, pl_life
 
 def draw_text(bg, txt, x, y, fnt, col): # 影付き文字の表示
     sur = fnt.render(txt, True, BLACK)
