@@ -1,8 +1,14 @@
 from . idx import Idx
 
-speed = 3
-idx = Idx.TITLE
+class SceneVar():
+    def __init__(self):
+        self.idx = Idx.TITLE
+        self.tmr = 0
+
+sv = SceneVar()
+# idx = Idx.TITLE
 tmr = 0
+speed = 3
 floor = 0
 fl_max = 0
 welcome = 0
