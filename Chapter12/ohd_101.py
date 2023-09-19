@@ -183,15 +183,6 @@ def move_player(key): # 主人公の移動
             pygame.mixer.music.stop()
             scene_change(Idx.FALLEN)
 
-# def eat_food(food, pl_life, pl_lifemax):
-#     # pl_life -= 100
-#     if food > 0:
-#         food -= 1
-#         pl_life = pl_life+1 if pl_life<pl_lifemax else pl_lifemax
-#     else:
-#         pl_life = pl_life-5 if pl_life>5 else 0
-#     return food, pl_life
-
 def draw_text(bg, txt, x, y, fnt, col): # 影付き文字の表示
     sur = fnt.render(txt, True, BLACK)
     bg.blit(sur, [x+1, y+2])
