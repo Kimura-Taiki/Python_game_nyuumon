@@ -16,6 +16,8 @@ def walk(n):
         food, pl_life = eat_food(food=food, pl_life=pl_life, pl_lifemax=pl_lifemax)
     return food, pl_life
 
+# 特定のテストを割愛
+# 参考 https://note.com/npaka/n/n84de488ba011
 @pytest.mark.skip
 def test_false():
     assert False
