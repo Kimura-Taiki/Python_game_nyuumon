@@ -16,6 +16,10 @@ def walk(n):
         food, pl_life = eat_food(food=food, pl_life=pl_life, pl_lifemax=pl_lifemax)
     return food, pl_life
 
+@pytest.mark.skip
+def test_false():
+    assert False
+
 @pytest.mark.parametrize(('n', 'food', 'pl_life'), [
     ( 0, 10, 10),
     ( 2,  8, 12),
