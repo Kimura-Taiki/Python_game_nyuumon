@@ -33,7 +33,7 @@ XP = [ 0, 1, 0,-1]
 YP = [-1, 0, 1, 0]
 def set_pillar_wall(mz, x, y): #柱の隣に壁を作る
     r = randint(0, 3) if x==2 else randint(0, 2)# １列目は四方に、２列目以降は左以外に壁を作る
-    mz[y+YP[r]][x+XP[r]] = 1
+    mz[y+YP[r]][x+XP[r]] = MAZE_WALL
     return mz
 
 def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動生成
@@ -42,6 +42,5 @@ def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動�
     maze[:, 0::maze_w-1] = MAZE_WALL
     maze[2:maze_h-2:2, 2:maze_w-2:2] = MAZE_WALL
     return pipeline_each(maze, 
-                        #  [partial(set_wall, x=i, y=j) for j in range(2, maze_h-2, 2) for i in range(2, maze_w-2, 2)]+ #柱
                          [partial(set_pillar_wall, x=i, y=j) for j in range(2, maze_h-2, 2) for i in range(2, maze_w-2, 2)]+ #柱から上下左右の壁
                          [partial(set_random_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]) #部屋
