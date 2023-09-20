@@ -20,12 +20,12 @@ MAZE_WALL = 1
 MAZE_ROOM = 2
 
 def set_wall(mz, x, y): #壁を作る
-    mz[y][x] = 1
+    mz[y][x] = MAZE_WALL
     return mz
 
 def set_random_room(mz, x, y): #20%の確率で部屋を作る
-    if mz[y][x] == 0 and randint(0, 99) < 20:
-        mz[y][x] = 2
+    if mz[y][x] == MAZE_SPACE and randint(0, 99) < 20:
+        mz[y][x] = MAZE_ROOM
     return mz
 
 def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動生成

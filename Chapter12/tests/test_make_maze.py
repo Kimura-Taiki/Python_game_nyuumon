@@ -6,7 +6,7 @@ from scipy.stats import chisquare
 from os.path import dirname
 import sys
 if __name__ == '__main__': sys.path.append(dirname(dirname(__file__)))
-from mod.scenes.field_wfi import set_wall, set_random_room
+from mod.scenes.field_wfi import set_wall, set_random_room, MAZE_SPACE, MAZE_WALL, MAZE_ROOM
 from mod.initialize.commethod import pipeline_each
 
 # 試しにnumpyも導入してみたよ
@@ -29,10 +29,10 @@ class Test_SetWall():
         print("ティアーダウンしたよ")
     
     def test_wall_sum(cls):
-        assert np.sum(cls.arr) == 3
+        assert np.count_nonzero(cls.arr == MAZE_WALL) == 3
 
     def test_is_wall(cls):
-        assert cls.arr[2][3] == 1
+        assert cls.arr[2][3] == MAZE_WALL
 
     def test_is_not_wall(cls):
         assert cls.arr[0][2] == 0
@@ -45,5 +45,9 @@ class Test_SetRandomRoom():
         print("作った配列は・・・")
         print(cls.arr)
 
-    def test_true(cls):
-        assert True
+    def test_chi(cls):
+        obs = np.array([np.count_nonzero(cls.arr == MAZE_ROOM), np.count_nonzero(cls.arr == MAZE_SPACE)])
+        print(obs)
+        exp = np.array([16, 65])
+        chi = chisquare(f_obs=obs, f_exp=exp)
+        assert 0.05 < chi.pvalue
