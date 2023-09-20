@@ -8,6 +8,7 @@ def eat_food(food, pl_life, pl_lifemax):
 
 from random import seed, randint
 from functools import partial
+import numpy as np
 from os.path import dirname
 import sys
 if __name__ == '__main__': sys.path.append(dirname(dirname(dirname(__file__))))
@@ -36,7 +37,8 @@ def set_pillar_wall(mz, x, y): #柱の隣に壁を作る
     return mz
 
 def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動生成
-    return pipeline_each([[0]*maze_w for i in range(maze_h)], 
+    # return pipeline_each([[0]*maze_w for i in range(maze_h)], 
+    return pipeline_each(np.zeros((maze_h, maze_w)), 
                          [partial(set_wall, x=0, y=i) for i in range(maze_h)]+ #左外郭
                          [partial(set_wall, x=maze_w-1, y=i) for i in range(maze_h)]+ #右外郭
                          [partial(set_wall, x=i, y=0) for i in range(maze_w)]+ #上外郭

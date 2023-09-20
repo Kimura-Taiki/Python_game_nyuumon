@@ -81,5 +81,15 @@ class Test_MakeMaze():
         print("作った配列は・・・")
         print(cls.maze)
 
-    def test_true(cls):
-        assert True
+    def test_compare_seed_fixation_mock(cls):
+        mock = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,],
+                         [1, 2, 0, 2, 0, 2, 1, 0, 0, 0, 1,],
+                         [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1,],
+                         [1, 2, 0, 2, 0, 2, 0, 0, 0, 0, 1,],
+                         [1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1,],
+                         [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,],
+                         [1, 0, 1, 0, 1, 0, 1, 2, 1, 0, 1,],
+                         [1, 2, 1, 2, 1, 0, 0, 0, 1, 0, 1,],
+                         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,],])
+        print(mock)
+        assert np.all(cls.maze == mock)
