@@ -40,7 +40,19 @@
 #     print(random.randint(0, 99))
 
 import numpy as np
-l = [[0, 1, 0], [1, 0, 1], [1, 1, 1]]
-print(type(l))
-print(np.sum(l))
-print(sum(sum(i) for i in l))
+from scipy import linalg
+from scipy.stats import chisquare
+
+# χ二乗検定を試してみる
+# 参考 https://toukei.link/programmingandsoftware/statistics_by_python/chisqtest_by_python/
+# wiki https://ja.wikipedia.org/wiki/%E3%82%AB%E3%82%A4%E4%BA%8C%E4%B9%97%E6%A4%9C%E5%AE%9A
+
+print((4*6/10))
+# exit()
+print(chisquare([8, 12, 8, 12, 8, 12], f_exp=[10, 10, 10, 10, 10, 10]))
+
+# A = np.array([[1,3,2],[-1,0,1],[2,3,0]])
+ 
+# AI = linalg.inv(A)
+ 
+# print(AI)

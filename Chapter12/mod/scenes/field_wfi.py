@@ -15,15 +15,20 @@ from mod.initialize.commethod import pipeline_each
 
 # -------------------------------- make_maze系統 --------------------------------
 
+MAZE_SPACE = 0
+MAZE_WALL = 1
+MAZE_ROOM = 2
+
 def set_wall(mz, x, y): #壁を作る
     mz[y][x] = 1
     return mz
 
+def set_random_room(mz, x, y): #20%の確率で部屋を作る
+    if mz[y][x] == 0 and randint(0, 99) < 20:
+        mz[y][x] = 2
+    return mz
+
 def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動生成
-    def set_random_room(mz, x, y): #20%の確率で部屋を作る
-        if mz[y][x] == 0 and randint(0, 99) < 20:
-            mz[y][x] = 2
-        return mz
     XP = [ 0, 1, 0,-1]
     YP = [-1, 0, 1, 0]
     def set_pillar_wall(mz, x, y): #柱の隣に壁を作る
