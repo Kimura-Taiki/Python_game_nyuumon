@@ -1,4 +1,5 @@
 import pytest
+import random
 import numpy as np
 from functools import partial
 # Gooness of fit test 適合度検定に使うライブラリ
@@ -6,7 +7,7 @@ from scipy.stats import chisquare
 from os.path import dirname
 import sys
 if __name__ == '__main__': sys.path.append(dirname(dirname(__file__)))
-from mod.scenes.field_wfi import set_wall, set_random_room, set_pillar_wall, MAZE_SPACE, MAZE_WALL, MAZE_ROOM
+from mod.scenes.field_wfi import set_wall, set_random_room, set_pillar_wall, make_maze, MAZE_SPACE, MAZE_WALL, MAZE_ROOM
 from mod.initialize.commethod import pipeline_each
 
 # 試しにnumpyも導入してみたよ
@@ -71,3 +72,14 @@ class Test_SetPillerWall():
         exp = np.array([15, 30, 15, 40, 20])
         chi =chisquare(f_obs=obs, f_exp=exp)
         assert 0.05 < chi.pvalue
+
+class Test_MakeMaze():
+    @classmethod
+    def setup_class(cls):
+        random.seed(0)
+        cls.maze = make_maze(maze_w=11, maze_h=9)
+        print("作った配列は・・・")
+        print(cls.maze)
+
+    def test_true(cls):
+        assert True
