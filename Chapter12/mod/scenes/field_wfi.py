@@ -40,13 +40,8 @@ def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動�
     maze = np.zeros((maze_h, maze_w))
     maze[0::maze_h-1, :] = MAZE_WALL
     maze[:, 0::maze_w-1] = MAZE_WALL
-    # return pipeline_each([[0]*maze_w for i in range(maze_h)], 
-    # return pipeline_each(np.zeros((maze_h, maze_w)), 
-    #                      [partial(set_wall, x=0, y=i) for i in range(maze_h)]+ #左外郭
-    #                      [partial(set_wall, x=maze_w-1, y=i) for i in range(maze_h)]+ #右外郭
-    #                      [partial(set_wall, x=i, y=0) for i in range(maze_w)]+ #上外郭
-    #                      [partial(set_wall, x=i, y=maze_h-1) for i in range(maze_w)]+ #下外郭
+    maze[2:maze_h-2:2, 2:maze_w-2:2] = MAZE_WALL
     return pipeline_each(maze, 
-                         [partial(set_wall, x=i, y=j) for j in range(2, maze_h-2, 2) for i in range(2, maze_w-2, 2)]+ #柱
+                        #  [partial(set_wall, x=i, y=j) for j in range(2, maze_h-2, 2) for i in range(2, maze_w-2, 2)]+ #柱
                          [partial(set_pillar_wall, x=i, y=j) for j in range(2, maze_h-2, 2) for i in range(2, maze_w-2, 2)]+ #柱から上下左右の壁
                          [partial(set_random_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]) #部屋
