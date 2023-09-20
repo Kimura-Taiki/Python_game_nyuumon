@@ -44,3 +44,5 @@ def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動�
     return pipeline_each(maze, 
                          [partial(set_pillar_wall, x=i, y=j) for j in range(2, maze_h-2, 2) for i in range(2, maze_w-2, 2)]+ #柱から上下左右の壁
                          [partial(set_random_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]) #部屋
+
+# -------------------------------- make_dungeon系統 --------------------------------

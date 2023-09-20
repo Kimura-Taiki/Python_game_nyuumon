@@ -34,14 +34,15 @@ def scene_in_battle(schedule): # バトル中のstep_by_step系シーンを一�
 
 # -------------------------------- 部分メソッド --------------------------------
 
-
+maze = []
+def dig_tunnel(dgn, x, y, dx, dy):
+    if (maze[y][x] == 0 or maze[y][x] == 2) and (maze[y+dy][x+dx] == 0 or maze[y+dy][x+dx] == 2):
+        dgn[y*3+1+dy][x*3+1+dx] = 0
+    return dgn
 def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
+    global maze
     maze = make_maze(maze_w, maze_h) # 元となる迷路を作る
     # 迷路からダンジョンを作る
-    def dig_tunnel(dgn, x, y, dx, dy):
-        if (maze[y][x] == 0 or maze[y][x] == 2) and (maze[y+dy][x+dx] == 0 or maze[y+dy][x+dx] == 2):
-            dgn[y*3+1+dy][x*3+1+dx] = 0
-        return dgn
     def dig_dot(dgn, x, y):
         dgn[y][x] = 0
         return dgn
