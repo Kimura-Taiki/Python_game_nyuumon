@@ -39,6 +39,10 @@
 #     # random.seed(0)
 #     print(random.randint(0, 99))
 
+for i in range(1, 15, 3):
+    print(i)
+exit()
+
 import numpy as np
 from scipy import linalg
 from scipy.stats import chisquare

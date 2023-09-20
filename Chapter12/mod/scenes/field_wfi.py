@@ -28,13 +28,14 @@ def set_random_room(mz, x, y): #20%の確率で部屋を作る
         mz[y][x] = MAZE_ROOM
     return mz
 
+XP = [ 0, 1, 0,-1]
+YP = [-1, 0, 1, 0]
+def set_pillar_wall(mz, x, y): #柱の隣に壁を作る
+    r = randint(0, 3) if x==2 else randint(0, 2)# １列目は四方に、２列目以降は左以外に壁を作る
+    mz[y+YP[r]][x+XP[r]] = 1
+    return mz
+
 def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動生成
-    XP = [ 0, 1, 0,-1]
-    YP = [-1, 0, 1, 0]
-    def set_pillar_wall(mz, x, y): #柱の隣に壁を作る
-        r = randint(0, 3) if x==2 else randint(0, 2)# １列目は四方に、２列目以降は左以外に壁を作る
-        mz[y+YP[r]][x+XP[r]] = 1
-        return mz
     return pipeline_each([[0]*maze_w for i in range(maze_h)], 
                          [partial(set_wall, x=0, y=i) for i in range(maze_h)]+ #左外郭
                          [partial(set_wall, x=maze_w-1, y=i) for i in range(maze_h)]+ #右外郭
