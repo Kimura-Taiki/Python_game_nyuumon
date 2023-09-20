@@ -50,5 +50,5 @@ from scipy.stats import chisquare
 
 a = np.arange(12).reshape((3, 4))
 print(a[1, :])
-a[1, :] = 0
+a[:, 0::4-1] = 0
 print(a)
