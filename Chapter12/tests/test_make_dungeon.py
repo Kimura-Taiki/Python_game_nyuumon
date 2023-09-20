@@ -13,9 +13,18 @@ from mod.scenes.field_wfi import make_dungeon
 class Test_Tameshi():
     @classmethod
     def setup_class(cls):
+        random.seed(0)
         cls.arr = make_dungeon(maze_w=11, maze_h=9)
         print("作った配列は・・・")
-        print(cls.arr)
-
+        # print(cls.arr)
+        # dgn = ''.join([''.join(["**" if j[i] == 9 else "  " for i in j])+"\n" for j in cls.arr])
+        dgn = ""
+        for j in cls.arr:
+            for i in j:
+                dgn += ("**" if i == 9 else "  ")
+            dgn += "\n"
+        # dgn = [[cls.arr[j,i] for i in j] for j in cls.arr]
+        # dgn = [sum(["**" if cls.arr[j, i] == 9 else "  " for i in j]) for j in cls.arr]
+        print(dgn)
     def test_true(cls):
         assert True
