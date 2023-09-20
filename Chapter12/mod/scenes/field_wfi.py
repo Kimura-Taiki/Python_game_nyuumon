@@ -10,13 +10,16 @@ from random import seed, randint
 from functools import partial
 from os.path import dirname
 import sys
-if __name__ == '__main__': sys.path.append(dirname(dirname(__file__)))
+if __name__ == '__main__': sys.path.append(dirname(dirname(dirname(__file__))))
 from mod.initialize.commethod import pipeline_each
 
+# -------------------------------- make_maze系統 --------------------------------
+
+def set_wall(mz, x, y): #壁を作る
+    mz[y][x] = 1
+    return mz
+
 def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動生成
-    def set_wall(mz, x, y): #壁を作る
-        mz[y][x] = 1
-        return mz
     def set_random_room(mz, x, y): #20%の確率で部屋を作る
         if mz[y][x] == 0 and randint(0, 99) < 20:
             mz[y][x] = 2

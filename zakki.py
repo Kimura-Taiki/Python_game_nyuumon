@@ -33,8 +33,14 @@
 # gogyou[Nizi.GREEN] = "蒼龍"
 # print([gogyou[col] for col in Nizi if col in gogyou.keys()])
 
-import random
-random.seed(0)
-for i in range(10):
-    # random.seed(0)
-    print(random.randint(0, 99))
+# import random
+# random.seed(0)
+# for i in range(10):
+#     # random.seed(0)
+#     print(random.randint(0, 99))
+
+import numpy as np
+l = [[0, 1, 0], [1, 0, 1], [1, 1, 1]]
+print(type(l))
+print(np.sum(l))
+print(sum(sum(i) for i in l))
