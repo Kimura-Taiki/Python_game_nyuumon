@@ -16,5 +16,8 @@ from .initialize.sound import se
 # 変数の宣言
 from .initialize.var import *
 
+# ダンジョン用定数の宣言
+from .initialize.dungeon import *
+
 # 共用メソッドの読み込み
 from .initialize.commethod import *

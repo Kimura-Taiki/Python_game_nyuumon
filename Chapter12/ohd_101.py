@@ -16,12 +16,6 @@ EMY_NAME = [
     "Death hornet", "Signal slime", "Devil plant", "Twin killer", "Hell"
     ]
 
-MAZE_W = 11
-MAZE_H = 9
-
-DUNGEON_W = MAZE_W*3
-DUNGEON_H = MAZE_H*3
-
 # -------------------------------- 共用メソッド --------------------------------
 
 def scene_by_schedule(schedule): # step_by_stepによる処理を一本化
