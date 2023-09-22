@@ -40,45 +40,23 @@
 #     print(random.randint(0, 99))
 
 
-import numpy as np
-from scipy import linalg
-from scipy.stats import chisquare
+# import numpy as np
+# from scipy import linalg
+# from scipy.stats import chisquare
 
 # χ二乗検定を試してみる
 # 参考 https://toukei.link/programmingandsoftware/statistics_by_python/chisqtest_by_python/
 # wiki https://ja.wikipedia.org/wiki/%E3%82%AB%E3%82%A4%E4%BA%8C%E4%B9%97%E6%A4%9C%E5%AE%9A
 
-a = np.arange(12).reshape((3, 4))
-print(a[1, :])
-a[:, 0::4-1] = 0
-print(a)
+# a = np.arange(12).reshape((3, 4))
+# print(a[1, :])
+# a[:, 0::4-1] = 0
+# print(a)
 
+class C():
+    a=1
+    b=2
 
-# titleのmake_dungeon
-    dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
-    put_protag(dungeon)
-    floor = 0
-    floor += 1
-    if floor > fl_max:
-        fl_max = floor
-    welcome = 15
-    pl_lifemax = 300
-    pl_life = pl_lifemax
-    pl_str = 100
-    food = 300
-    potion = 0
-    blazegem = 0
-    scene_change(Idx.FIELD_WFI)
-    pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
-    pygame.mixer_music.play(-1)
-
-# on_stairsのmake_dungeon
-    global floor, fl_max, welcome, dungeon
-    draw_dungeon(screen, fontS)
-    pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
-    floor += 1
-    if floor > fl_max:
-        fl_max = floor
-    welcome = 15
-    dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
-    put_protag(dungeon)
+print(C.a, C.b)
+C.a, C.b = 4, 8
+print(C.a, C.b)

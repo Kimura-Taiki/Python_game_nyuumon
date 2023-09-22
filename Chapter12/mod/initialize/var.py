@@ -9,9 +9,13 @@ sv = SceneVar()
 # idx = Idx.TITLE
 tmr = 0
 speed = 3
-floor = 0
-fl_max = 0
-welcome = 0
+class Floor():
+    now = 0
+    max = 0
+    welcome = 0
+# floor = 0
+# fl_max = 0
+# welcome = 0
 
 pl_x = 0
 pl_y = 0

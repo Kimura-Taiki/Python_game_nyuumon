@@ -156,10 +156,10 @@ def draw_para(bg, fnt): # 主人公の能力を表示
 
 def init_battle(): # 戦闘に入る準備をする
     global imgEnemy, emy_name, emy_lifemax, emy_life, emy_step, emy_x, emy_y
-    typ = random.randint(0, floor)
-    if floor >= 10:
+    typ = random.randint(0, Floor.now)
+    if Floor.now >= 10:
         typ = random.randint(0, 9)
-    lev = random.randint(1, floor)
+    lev = random.randint(1, Floor.now)
     imgEnemy = pygame.image.load("Chapter12/image/enemy"+str(typ)+".png")
     emy_name = EMY_NAME[typ] + " LV" + str(lev)
     emy_lifemax = 60*(typ+1) + (lev-1)*10
@@ -234,38 +234,31 @@ def set_message(msg):
     message[9] = msg
 
 def make_new_dungeon():
-    global floor, fl_max, welcome, dungeon
-    # draw_dungeon(screen, fontS)
-    # pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
-    floor += 1
-    if floor > fl_max:
-        fl_max = floor
-    welcome = 15
+    global dungeon
+    pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
+    Floor.now += 1
+    if Floor.now > Floor.max:
+        Floor.max = Floor.now
+    Floor.welcome = 15
     dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
     put_protag(dungeon)
 
 def scene_title(): # タイトル画面
     global screen, font, fontS, key
     global sv
-    global floor, fl_max, welcome, pl_lifemax, pl_life, pl_str, food, potion, blazegem
+    global pl_lifemax, pl_life, pl_str, food, potion, blazegem
     global dungeon
     if sv.tmr == 1:
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_title.ogg")
         pygame.mixer.music.play(-1)
     screen.fill(BLACK)
     screen.blit(imgTitle, [40, 60])
-    if fl_max >= 2:
-        draw_text(screen, "You reached floor {}.".format(fl_max), 300, 460, font, CYAN)
+    if Floor.max >= 2:
+        draw_text(screen, "You reached floor {}.".format(Floor.max), 300, 460, font, CYAN)
     draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
     if key[K_SPACE] == 1:
-        floor = 0
+        Floor.now = 0
         make_new_dungeon()
-        # floor += 1
-        # if floor > fl_max:
-        #     fl_max = floor
-        # welcome = 15
-        # dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
-        # put_protag(dungeon)
         pl_lifemax = 300
         pl_life = pl_lifemax
         pl_str = 100
@@ -277,13 +270,12 @@ def scene_title(): # タイトル画面
         pygame.mixer_music.play(-1)
 
 def scene_field_wfi(): # プレイヤーの移動
-    global welcome
     move_player(key)
     draw_dungeon(screen, fontS)
-    draw_text(screen, "floor {} ({},{})".format(floor, pl_x, pl_y), 60, 40, fontS, WHITE)
-    if welcome > 0:
-        welcome -= 1
-        draw_text(screen, "Welcome to floor {}.".format(floor), 300, 180, font, CYAN)
+    draw_text(screen, "floor {} ({},{})".format(Floor.now, pl_x, pl_y), 60, 40, fontS, WHITE)
+    if Floor.welcome > 0:
+        Floor.welcome -= 1
+        draw_text(screen, "Welcome to floor {}.".format(Floor.now), 300, 180, font, CYAN)
 
 # Idx.ON_STAIRS系統(画面切り替え)の工程メソッド
 def close_curtain():
