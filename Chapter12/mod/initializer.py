@@ -21,3 +21,6 @@ from .initialize.dungeon import *
 
 # 共用メソッドの読み込み
 from .initialize.commethod import *
+
+# pygame経由の描画メソッドの読み込み
+from .initialize.comdraw import *

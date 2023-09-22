@@ -134,11 +134,11 @@ def move_player(key): # 主人公の移動
             pygame.mixer.music.stop()
             scene_change(Idx.FALLEN)
 
-def draw_text(bg, txt, x, y, fnt, col): # 影付き文字の表示
-    sur = fnt.render(txt, True, BLACK)
-    bg.blit(sur, [x+1, y+2])
-    sur = fnt.render(txt, True, col)
-    bg.blit(sur, [x, y])
+# def draw_text(bg, txt, x, y, fnt, col): # 影付き文字の表示
+#     sur = fnt.render(txt, True, BLACK)
+#     bg.blit(sur, [x+1, y+2])
+#     sur = fnt.render(txt, True, col)
+#     bg.blit(sur, [x, y])
 
 def draw_para(bg, fnt): # 主人公の能力を表示
     X = 30

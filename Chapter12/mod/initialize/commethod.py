@@ -28,11 +28,3 @@ def step_by_step(steps, resolved, spd=1):
 
 def pass_method():
     return
-
-# def scene_by_schedule(schedule): # step_by_stepによる処理を一本化
-#     global scene_steps
-#     scene_steps = step_by_step(schedule, scene_steps, speed)
-
-# def scene_in_battle(schedule): # バトル中のstep_by_step系シーンを一本化
-#     draw_battle(screen, fontS)
-#     scene_by_schedule(schedule)
