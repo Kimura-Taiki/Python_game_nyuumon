@@ -52,3 +52,33 @@ a = np.arange(12).reshape((3, 4))
 print(a[1, :])
 a[:, 0::4-1] = 0
 print(a)
+
+
+# titleのmake_dungeon
+    dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
+    put_protag(dungeon)
+    floor = 0
+    floor += 1
+    if floor > fl_max:
+        fl_max = floor
+    welcome = 15
+    pl_lifemax = 300
+    pl_life = pl_lifemax
+    pl_str = 100
+    food = 300
+    potion = 0
+    blazegem = 0
+    scene_change(Idx.FIELD_WFI)
+    pygame.mixer.music.load("Chapter12/sound/ohd_bgm_field.ogg")
+    pygame.mixer_music.play(-1)
+
+# on_stairsのmake_dungeon
+    global floor, fl_max, welcome, dungeon
+    draw_dungeon(screen, fontS)
+    pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
+    floor += 1
+    if floor > fl_max:
+        fl_max = floor
+    welcome = 15
+    dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
+    put_protag(dungeon)

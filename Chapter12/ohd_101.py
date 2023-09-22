@@ -28,27 +28,6 @@ def scene_in_battle(schedule): # バトル中のstep_by_step系シーンを一�
 
 # -------------------------------- 部分メソッド --------------------------------
 
-# def dig_tunnel(dgn, maze, x, y, dx, dy):
-#     if (maze[y][x] == 0 or maze[y][x] == 2) and (maze[y+dy][x+dx] == 0 or maze[y+dy][x+dx] == 2):
-#         dgn[y*3+1+dy][x*3+1+dx] = 0
-#     return dgn
-
-# def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
-#     maze = make_maze(maze_w, maze_h) # 元となる迷路を作る
-#     # 迷路からダンジョンを作る
-#     def dig_dot(dgn, x, y):
-#         dgn[y][x] = 0
-#         return dgn
-#     def dig_room(dgn, x, y):
-#         return pipeline_each(dgn, [partial(dig_dot, x=i, y=j) for j in range(y*3, y*3+3) for i in range(x*3, x*3+3)])
-#     return pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], 
-#                          [partial(dig_tunnel, maze=maze, x=i, y=j, dx=0, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-#                          [partial(dig_tunnel, maze=maze, x=i, y=j, dx=0, dy=-1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-#                          [partial(dig_tunnel, maze=maze, x=i, y=j, dx=0, dy=1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-#                          [partial(dig_tunnel, maze=maze, x=i, y=j, dx=-1, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-#                          [partial(dig_tunnel, maze=maze, x=i, y=j, dx=1, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
-#                          [partial(dig_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1) if maze[j][i] == 2])
-
 def draw_dungeon(bg, fnt): # ダンジョンを描画する
     bg.fill(BLACK)
     for y in range(-4, 6):
@@ -257,20 +236,24 @@ def set_message(msg):
 def scene_title(): # タイトル画面
     global screen, font, fontS, key
     global sv
-    global floor, welcome, pl_lifemax, pl_life, pl_str, food, potion, blazegem
+    global floor, fl_max, welcome, pl_lifemax, pl_life, pl_str, food, potion, blazegem
     global dungeon
     if sv.tmr == 1:
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_title.ogg")
         pygame.mixer.music.play(-1)
     screen.fill(BLACK)
     screen.blit(imgTitle, [40, 60])
-    if fl_max  >= 2:
+    if fl_max >= 2:
         draw_text(screen, "You reached floor {}.".format(fl_max), 300, 460, font, CYAN)
     draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
     if key[K_SPACE] == 1:
         dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
         put_protag(dungeon)
-        floor = 1
+        floor = 0
+        floor += 1
+        if floor > fl_max:
+            fl_max = floor
+        # floor = 1
         welcome = 15
         pl_lifemax = 300
         pl_life = pl_lifemax

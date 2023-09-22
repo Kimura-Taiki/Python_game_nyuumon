@@ -13,6 +13,7 @@ from os.path import dirname
 import sys
 if __name__ == '__main__': sys.path.append(dirname(dirname(dirname(__file__))))
 from mod.initialize.commethod import pipeline_each
+from mod.initialize.dungeon import *
 
 # -------------------------------- make_maze系統 --------------------------------
 
@@ -46,8 +47,6 @@ def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動�
                          [partial(set_random_room, x=i, y=j) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]) #部屋
 
 # -------------------------------- make_dungeon系統 --------------------------------
-
-
 
 def dig_tunnel(dgn, maze, x, y, dx, dy):
     if (maze[y][x] == MAZE_SPACE or maze[y][x] == MAZE_ROOM) and (maze[y+dy][x+dx] == MAZE_SPACE or maze[y+dy][x+dx] == MAZE_ROOM):
