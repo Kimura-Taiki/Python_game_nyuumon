@@ -54,9 +54,10 @@
 # print(a)
 
 class C():
-    a=1
-    b=2
+    from random import randint
+    a = randint(0, 9)
+    b = randint(10, 29)
 
 print(C.a, C.b)
-C.a, C.b = 4, 8
+C.a, C.b = 4, randint(10,29)
 print(C.a, C.b)

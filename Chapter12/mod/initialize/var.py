@@ -6,16 +6,25 @@ class SceneVar():
         self.tmr = 0
 
 sv = SceneVar()
-# idx = Idx.TITLE
 tmr = 0
 speed = 3
 class Floor():
+    from os.path import dirname
+    import sys
+    if __name__ == '__main__': sys.path.append(dirname(dirname(dirname(__file__))))
     now = 0
     max = 0
     welcome = 0
-# floor = 0
-# fl_max = 0
-# welcome = 0
+
+    def go_downstaris():
+        Floor.now += 1
+        if Floor.now > Floor.max:
+            Floor.max = Floor.now
+        Floor.welcome = 15
+
+    # def draw_reached_floor():
+    # if Floor.max < 1:return
+    # draw_text(screen, "You reached floor {}.".format(Floor.max), 300, 460, font, CYAN)
 
 pl_x = 0
 pl_y = 0

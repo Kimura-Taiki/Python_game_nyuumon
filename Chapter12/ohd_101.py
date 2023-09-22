@@ -236,10 +236,7 @@ def set_message(msg):
 def make_new_dungeon():
     global dungeon
     pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
-    Floor.now += 1
-    if Floor.now > Floor.max:
-        Floor.max = Floor.now
-    Floor.welcome = 15
+    Floor.go_downstaris()
     dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
     put_protag(dungeon)
 
@@ -253,8 +250,6 @@ def scene_title(): # タイトル画面
         pygame.mixer.music.play(-1)
     screen.fill(BLACK)
     screen.blit(imgTitle, [40, 60])
-    if Floor.max >= 2:
-        draw_text(screen, "You reached floor {}.".format(Floor.max), 300, 460, font, CYAN)
     draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
     if key[K_SPACE] == 1:
         Floor.now = 0
