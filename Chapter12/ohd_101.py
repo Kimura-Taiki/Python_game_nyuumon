@@ -233,6 +233,17 @@ def set_message(msg):
         message[i] = message[i+1]
     message[9] = msg
 
+def make_new_dungeon():
+    global floor, fl_max, welcome, dungeon
+    # draw_dungeon(screen, fontS)
+    # pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
+    floor += 1
+    if floor > fl_max:
+        fl_max = floor
+    welcome = 15
+    dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
+    put_protag(dungeon)
+
 def scene_title(): # タイトル画面
     global screen, font, fontS, key
     global sv
@@ -247,14 +258,14 @@ def scene_title(): # タイトル画面
         draw_text(screen, "You reached floor {}.".format(fl_max), 300, 460, font, CYAN)
     draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
     if key[K_SPACE] == 1:
-        dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
-        put_protag(dungeon)
         floor = 0
-        floor += 1
-        if floor > fl_max:
-            fl_max = floor
-        # floor = 1
-        welcome = 15
+        make_new_dungeon()
+        # floor += 1
+        # if floor > fl_max:
+        #     fl_max = floor
+        # welcome = 15
+        # dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
+        # put_protag(dungeon)
         pl_lifemax = 300
         pl_life = pl_lifemax
         pl_str = 100
@@ -281,16 +292,6 @@ def close_curtain():
     h = 80*tmr
     pygame.draw.rect(screen, BLACK, [0, 0, 880, h])
     pygame.draw.rect(screen, BLACK, [0, 720-h, 880, h])
-def make_new_dungeon():
-    global floor, fl_max, welcome, dungeon
-    draw_dungeon(screen, fontS)
-    pygame.draw.rect(screen, BLACK, [0, 0, 880, 720])
-    floor += 1
-    if floor > fl_max:
-        fl_max = floor
-    welcome = 15
-    dungeon = put_event(make_dungeon(MAZE_W, MAZE_H))
-    put_protag(dungeon)
 def open_curtain():
     global tmr, screen
     draw_dungeon(screen, fontS)
