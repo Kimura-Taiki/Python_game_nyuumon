@@ -8,6 +8,7 @@ class SceneVar():
 sv = SceneVar()
 tmr = 0
 speed = 3
+
 class Floor():
     from os.path import dirname
     import sys
@@ -22,9 +23,18 @@ class Floor():
             Floor.max = Floor.now
         Floor.welcome = 15
 
-    # def draw_reached_floor():
-    # if Floor.max < 1:return
-    # draw_text(screen, "You reached floor {}.".format(Floor.max), 300, 460, font, CYAN)
+    def draw_reached_floor(screen, font, x, y):
+        from mod.initialize.color import CYAN
+        from mod.initialize.comdraw import draw_text
+        if Floor.max < 1:return
+        draw_text(screen, "You reached floor {}.".format(Floor.max), x, y, font, CYAN)
+
+    def draw_welcome_newfloor(screen, font, x, y):
+        from mod.initialize.color import CYAN
+        from mod.initialize.comdraw import draw_text
+        if Floor.welcome > 0:
+            Floor.welcome -= 1
+            draw_text(screen, "Welcome to floor {}.".format(Floor.now), 300, 180, font, CYAN)
 
 pl_x = 0
 pl_y = 0

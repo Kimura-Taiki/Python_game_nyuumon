@@ -134,12 +134,6 @@ def move_player(key): # 主人公の移動
             pygame.mixer.music.stop()
             scene_change(Idx.FALLEN)
 
-# def draw_text(bg, txt, x, y, fnt, col): # 影付き文字の表示
-#     sur = fnt.render(txt, True, BLACK)
-#     bg.blit(sur, [x+1, y+2])
-#     sur = fnt.render(txt, True, col)
-#     bg.blit(sur, [x, y])
-
 def draw_para(bg, fnt): # 主人公の能力を表示
     X = 30
     Y = 600
@@ -250,6 +244,7 @@ def scene_title(): # タイトル画面
         pygame.mixer.music.play(-1)
     screen.fill(BLACK)
     screen.blit(imgTitle, [40, 60])
+    Floor.draw_reached_floor(screen=screen, font=font, x=300, y=460)
     draw_text(screen, "Press space key", 320, 560, font, BLINK[tmr%6])
     if key[K_SPACE] == 1:
         Floor.now = 0
@@ -268,9 +263,7 @@ def scene_field_wfi(): # プレイヤーの移動
     move_player(key)
     draw_dungeon(screen, fontS)
     draw_text(screen, "floor {} ({},{})".format(Floor.now, pl_x, pl_y), 60, 40, fontS, WHITE)
-    if Floor.welcome > 0:
-        Floor.welcome -= 1
-        draw_text(screen, "Welcome to floor {}.".format(Floor.now), 300, 180, font, CYAN)
+    Floor.draw_welcome_newfloor(screen=screen, font=font, x=300, y=180)
 
 # Idx.ON_STAIRS系統(画面切り替え)の工程メソッド
 def close_curtain():
