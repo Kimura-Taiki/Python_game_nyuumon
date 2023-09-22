@@ -47,6 +47,8 @@ def make_maze(maze_w, maze_h): # ダンジョンの元となる迷路の自動�
 
 # -------------------------------- make_dungeon系統 --------------------------------
 
+
+
 def dig_tunnel(dgn, maze, x, y, dx, dy):
     if (maze[y][x] == MAZE_SPACE or maze[y][x] == MAZE_ROOM) and (maze[y+dy][x+dx] == MAZE_SPACE or maze[y+dy][x+dx] == MAZE_ROOM):
         dgn[y*3+1+dy][x*3+1+dx] = 0
@@ -63,7 +65,8 @@ def make_dungeon(maze_w, maze_h): # ダンジョンの自動生成
     def dig_room(dgn, x, y):
         return pipeline_each(dgn, [partial(dig_dot, x=i, y=j) for j in range(y*3, y*3+3) for i in range(x*3, x*3+3)])
     # return pipeline_each([[9]*DUNGEON_W for j in range(DUNGEON_H)], 
-    return pipeline_each(np.full((DUNGEON_H, DUNGEON_W), 9), 
+    dungeon = np.full((DUNGEON_H, DUNGEON_W), 9)
+    return pipeline_each(dungeon, 
                          [partial(dig_tunnel, maze=maze, x=i, y=j, dx=0, dy=0) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
                          [partial(dig_tunnel, maze=maze, x=i, y=j, dx=0, dy=-1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
                          [partial(dig_tunnel, maze=maze, x=i, y=j, dx=0, dy=1) for j in range(1, maze_h-1) for i in range(1, maze_w-1)]+
