@@ -150,10 +150,8 @@ def draw_para(bg, fnt): # 主人公の能力を表示
 
 def init_battle(): # 戦闘に入る準備をする
     global imgEnemy, emy_name, emy_lifemax, emy_life, emy_step, emy_x, emy_y
-    typ = random.randint(0, Floor.now)
-    if Floor.now >= 10:
-        typ = random.randint(0, 9)
-    lev = random.randint(1, Floor.now)
+    typ = Floor.enemy_type()
+    lev = Floor.enemy_level()
     imgEnemy = pygame.image.load("Chapter12/image/enemy"+str(typ)+".png")
     emy_name = EMY_NAME[typ] + " LV" + str(lev)
     emy_lifemax = 60*(typ+1) + (lev-1)*10

@@ -35,6 +35,15 @@ class Floor():
         if Floor.welcome > 0:
             Floor.welcome -= 1
             draw_text(screen, "Welcome to floor {}.".format(Floor.now), 300, 180, font, CYAN)
+    
+    def enemy_type():
+        from random import randint
+        return randint(0, 9) if Floor.now >= 10 else randint(0, Floor.now)
+    
+    def enemy_level():
+        from random import randint
+        return randint(1, Floor.now)
+
 
 pl_x = 0
 pl_y = 0
