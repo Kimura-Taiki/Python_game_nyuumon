@@ -44,11 +44,20 @@ class Floor():
         from random import randint
         return randint(1, Floor.now)
 
-
 pl_x = 0
 pl_y = 0
 pl_d = 0
 pl_a = 0
+
+class Unit():
+    def __init__(self):
+        self.lifemax = 0
+        self.life = 0
+        self.str = 0
+
+pl = Unit()
+emy = Unit()
+
 pl_lifemax = 0
 pl_life = 0
 pl_str = 0

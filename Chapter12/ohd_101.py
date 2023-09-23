@@ -82,7 +82,7 @@ def put_protag(dgn): # 主人公をダンジョン上の空白地にランダム
     dungeon[pl_y+1][pl_x] = 3
 
 def move_player(key): # 主人公の移動
-    global sv, pl_x, pl_y, pl_d, pl_a, pl_life, food, potion, blazegem, treasure
+    global sv, pl_x, pl_y, pl_d, pl_a, food, potion, blazegem, treasure
     def on_event(bool, chip, i, func):
         global dungeon, pl_x, pl_y, sv
         if dungeon[pl_y][pl_x] != chip: return bool
@@ -128,9 +128,8 @@ def move_player(key): # 主人公の移動
     pl_a = pl_d*2
     if is_move == True: # 移動したら食料の量と体力を計算
         pl_a += tmr%2 # 移動したら足踏みのアニメーション
-        food, pl_life = eat_food(food, pl_life, pl_lifemax)
-        # food, pl_life = field_wfi.eat_food(food, pl_life, pl_lifemax)
-        if pl_life <= 0:
+        food, pl.life = eat_food(food, pl.life, pl.lifemax)
+        if pl.life <= 0:
             pygame.mixer.music.stop()
             scene_change(Idx.FALLEN)
 
@@ -139,9 +138,9 @@ def draw_para(bg, fnt): # 主人公の能力を表示
     Y = 600
     bg.blit(imgPara, [X, Y])
     col = WHITE
-    if pl_life < 10 and tmr%2 ==0: col = RED
-    draw_text(bg, "{}/{}".format(pl_life, pl_lifemax), X+128, Y+6, fnt, col)
-    draw_text(bg, str(pl_str), X+128, Y+33, fnt, WHITE)
+    if pl.life < 10 and tmr%2 ==0: col = RED
+    draw_text(bg, "{}/{}".format(pl.life, pl.lifemax), X+128, Y+6, fnt, col)
+    draw_text(bg, str(pl.str), X+128, Y+33, fnt, WHITE)
     col = WHITE
     if food == 0 and tmr%2 == 0: col = RED
     draw_text(bg, str(food), X+128, Y+60, fnt, col)
@@ -235,7 +234,7 @@ def make_new_dungeon():
 def scene_title(): # タイトル画面
     global screen, font, fontS, key
     global sv
-    global pl_lifemax, pl_life, pl_str, food, potion, blazegem
+    global food, potion, blazegem
     global dungeon
     if sv.tmr == 1:
         pygame.mixer.music.load("Chapter12/sound/ohd_bgm_title.ogg")
@@ -247,9 +246,9 @@ def scene_title(): # タイトル画面
     if key[K_SPACE] == 1:
         Floor.now = 0
         make_new_dungeon()
-        pl_lifemax = 300
-        pl_life = pl_lifemax
-        pl_str = 100
+        pl.lifemax = 300
+        pl.life = pl.lifemax
+        pl.str = 100
         food = 300
         potion = 0
         blazegem = 0
@@ -334,10 +333,9 @@ def shake_protag():
     dmg_eff = 5
     emy_step = 0
 def settle_damage():
-    global pl_life
-    pl_life -= dmg
-    if pl_life < 0:
-        pl_life = 0
+    pl.life -= dmg
+    if pl.life < 0:
+        pl.life = 0
         scene_change(Idx.LOSE)
 enemy_turn_schedule = [[partial(set_message,msg="Enemy turn."), 0],
                        [pass_method, 5],
@@ -377,7 +375,7 @@ def you_win():
     pygame.mixer.music.stop()
     se[5].play()
 def win_end():
-    if random.randint(0, emy_lifemax) > random.randint(0, pl_lifemax):
+    if random.randint(0, emy_lifemax) > random.randint(0, pl.lifemax):
         scene_change(Idx.LEVEL_UP)
     else:
         scene_change(Idx.BATTLE_END)
@@ -390,15 +388,13 @@ def level_up():
     set_message("Level up!")
     se[4].play()
 def max_life_plus():
-    global pl_lifemax
     lif_p = random.randint(10, 20)
     set_message("Max life + "+str(lif_p))
-    pl_lifemax += lif_p
+    pl.lifemax += lif_p
 def str_plus():
-    global pl_str
     str_p = random.randint(5, 10)
     set_message("Str + "+str(str_p))
-    pl_str += str_p
+    pl.str += str_p
 level_up_schedule = [[level_up, 0],
                      [pass_method, 20],
                      [max_life_plus, 0],
@@ -417,8 +413,8 @@ def has_potion():
     set_message("Potion!")
     se[2].play()
 def full_recovery():
-    global pl_life, potion
-    pl_life = pl_lifemax
+    global potion
+    pl.life = pl.lifemax
     potion -= 1
 potion_schedule = [[has_potion, 0],
                    [pass_method, 6],
@@ -481,7 +477,7 @@ def protag_slash():
     global dmg
     set_message("You attack!")
     se[0].play()
-    dmg = pl_str + random.randint(0, 9)
+    dmg = pl.str + random.randint(0, 9)
 def shake_bg():
     screen.blit(imgEffect[0], [700-tmr*120, -100+tmr*120])
 attack_schedule = [[protag_slash, 0],
